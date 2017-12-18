@@ -2,6 +2,10 @@
 " Author: Elvis Oliveira - http://github.com/elvisoliveira "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" Syntax Hightlight.
+syntax enable
+colorscheme desert
+
 " Set PowerLine plugin:
 " Don't forget to create the symbolic link inside ~/.vim
 " ln -s /path/to/site-packages ~/.vim/
