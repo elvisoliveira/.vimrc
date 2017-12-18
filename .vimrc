@@ -6,6 +6,9 @@
 syntax enable
 colorscheme desert
 
+" Show line numbers.
+set number
+
 " Set PowerLine plugin:
 " Don't forget to create the symbolic link inside ~/.vim
 " ln -s /path/to/site-packages ~/.vim/
