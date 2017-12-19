@@ -40,3 +40,6 @@ set t_Co=256
 " Show all hidden characters.
 set listchars=eol:¬,tab:>·,trail:~,extends:>,precedes:<,space:␣
 set list
+
+" CtrlP Showing hidden files.
+let g:ctrlp_show_hidden = 1
