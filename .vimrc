@@ -9,6 +9,20 @@ colorscheme desert
 " Show line numbers.
 set number
 
+" Vundle requirements:
+set nocompatible
+
+filetype off
+filetype plugin indent on
+
+" Vundle setup:
+set rtp+=~/.vim/bundle/Vundle.vim
+
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'kien/ctrlp.vim'
+call vundle#end()
+
 " Set PowerLine plugin:
 " Don't forget to create the symbolic link inside ~/.vim
 " ln -s /path/to/site-packages ~/.vim/
