@@ -2,6 +2,9 @@
 " Author: Elvis Oliveira - http://github.com/elvisoliveira "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" 0ms for key sequences.
+set timeoutlen=1000 ttimeoutlen=0
+
 " Syntax Hightlight.
 syntax enable
 colorscheme desert
