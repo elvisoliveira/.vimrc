@@ -9,6 +9,9 @@ set timeoutlen=1000 ttimeoutlen=0
 syntax enable
 colorscheme desert
 
+" Convert tabs to spaces.
+set tabstop=4 shiftwidth=4 expandtab
+
 " Show line numbers.
 set number
 
