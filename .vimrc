@@ -13,7 +13,7 @@ colorscheme desert
 set tabstop=4 shiftwidth=4 expandtab
 
 " Show line numbers.
-set number
+set number relativenumber
 
 " Vundle requirements:
 set nocompatible
