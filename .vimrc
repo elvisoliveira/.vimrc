@@ -45,7 +45,7 @@ set laststatus=2
 set t_Co=256
 
 " Show all hidden characters.
-set listchars=eol:¬,tab:>·,trail:~,extends:>,precedes:<,space:␣
+set listchars=eol:¬,tab:>·,trail:~,extends:>,precedes:<,space:·
 set list
 
 " CtrlP Showing hidden files.
