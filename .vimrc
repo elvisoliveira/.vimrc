@@ -65,3 +65,8 @@ set clipboard=unnamed
 vmap <C-x> :!pbcopy<cr>
 " ctrl-c for copy
 vmap <C-c> :w !pbcopy<cr><cr>
+
+" Autoformat
+noremap <F3> :Autoformat html<CR>
+noremap <F4> :Autoformat css<CR>
+noremap <F5> :g/^$/d<CR>
