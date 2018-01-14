@@ -60,3 +60,8 @@ let g:ctrlp_show_hidden = 1
 
 " Copy system wide.
 set clipboard=unnamed
+
+" ctrl-x for cut
+vmap <C-x> :!pbcopy<cr>
+" ctrl-c for copy
+vmap <C-c> :w !pbcopy<cr><cr>
