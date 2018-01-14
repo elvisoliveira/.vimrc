@@ -52,5 +52,8 @@ set t_Co=256
 set listchars=eol:¬,tab:>·,trail:~,extends:>,precedes:<,space:·
 set list
 
+" Turn off word wrap
+set wrap!
+
 " CtrlP Showing hidden files.
 let g:ctrlp_show_hidden = 1
