@@ -57,3 +57,6 @@ set wrap!
 
 " CtrlP Showing hidden files.
 let g:ctrlp_show_hidden = 1
+
+" Copy system wide.
+set clipboard=unnamed
