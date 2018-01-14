@@ -33,7 +33,8 @@ set rtp+=~/.vim/bundle/Vundle.vim
 
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'kien/ctrlp.vim'
+Plugin 'Chiel92/vim-autoformat'
+Plugin 'mattn/emmet-vim'
 call vundle#end()
 
 " Set PowerLine plugin:
