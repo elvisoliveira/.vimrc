@@ -35,6 +35,8 @@ call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'Chiel92/vim-autoformat'
 Plugin 'mattn/emmet-vim'
+Plugin 'scrooloose/nerdtree'
+Plugin 'posva/vim-vue'
 call vundle#end()
 
 " Set PowerLine plugin:
@@ -62,11 +64,14 @@ let g:ctrlp_show_hidden = 1
 set clipboard=unnamed
 
 " ctrl-x for cut
-vmap <C-x> :!pbcopy<cr>
+vmap <C-x> :!pbcopy<CR>
 " ctrl-c for copy
-vmap <C-c> :w !pbcopy<cr><cr>
+vmap <C-c> :w !pbcopy<CR><CR>
 
 " Autoformat
 noremap <F3> :Autoformat html<CR>
 noremap <F4> :Autoformat css<CR>
 noremap <F5> :g/^$/d<CR>
+
+" NERDtree
+map <C-n> :NERDTreeToggle<CR>
