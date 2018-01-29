@@ -39,7 +39,7 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'Chiel92/vim-autoformat'
 Plugin 'mattn/emmet-vim'
 Plugin 'scrooloose/nerdtree'
-Plugin 'posva/vim-vue'
+Plugin 'ryanoasis/vim-devicons'
 call vundle#end()
 
 " Set PowerLine plugin:
