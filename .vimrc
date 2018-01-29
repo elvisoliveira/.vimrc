@@ -60,6 +60,9 @@ set list
 " Turn off word wrap
 set wrap!
 
+" Disable automatic comment insertion
+autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+
 " CtrlP Showing hidden files.
 let g:ctrlp_show_hidden = 1
 
