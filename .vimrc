@@ -2,6 +2,9 @@
 " Author: Elvis Oliveira - http://github.com/elvisoliveira "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" Set bash as default shell.
+set shell=/bin/bash
+
 " No Swap files.
 set noswapfile
 
