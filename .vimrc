@@ -77,9 +77,10 @@ vmap <C-x> :!pbcopy<CR>
 vmap <C-c> :w !pbcopy<CR><CR>
 
 " Autoformat
-noremap <F3> :Autoformat html<CR>
-noremap <F4> :Autoformat css<CR>
-noremap <F5> :g/^$/d<CR>
+noremap <F1> :g/^$/d<CR>
+noremap <F2> :Autoformat html<CR>
+noremap <F3> :Autoformat css<CR>
+noremap <F4> :Autoformat php<CR>
 
 " NERDtree
 map <C-n> :NERDTreeToggle<CR>
