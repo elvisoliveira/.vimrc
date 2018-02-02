@@ -83,6 +83,15 @@ noremap <F5> :g/^$/d<CR>
 " NERDtree
 map <C-n> :NERDTreeToggle<CR>
 
+" enable line numbers
+let NERDTreeShowLineNumbers=1
+
+" Set NERDTree with
+let g:NERDTreeWinSize=60
+
+" make sure relative line numbers are used
+autocmd FileType nerdtree setlocal relativenumber
+
 " ControlP Buffer
 map <C-b> :CtrlPBuffer<CR>
 map <C-k> :bnext<CR>
