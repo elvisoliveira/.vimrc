@@ -40,6 +40,7 @@ Plugin 'Chiel92/vim-autoformat'
 Plugin 'mattn/emmet-vim'
 Plugin 'scrooloose/nerdtree'
 Plugin 'ryanoasis/vim-devicons'
+Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'bling/vim-bufferline'
 call vundle#end()
 
