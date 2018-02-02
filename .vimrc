@@ -40,6 +40,7 @@ Plugin 'Chiel92/vim-autoformat'
 Plugin 'mattn/emmet-vim'
 Plugin 'scrooloose/nerdtree'
 Plugin 'ryanoasis/vim-devicons'
+Plugin 'bling/vim-bufferline'
 call vundle#end()
 
 " Set PowerLine plugin:
@@ -81,3 +82,8 @@ noremap <F5> :g/^$/d<CR>
 
 " NERDtree
 map <C-n> :NERDTreeToggle<CR>
+
+" ControlP Buffer
+map <C-b> :CtrlPBuffer<CR>
+map <C-k> :bnext<CR>
+map <C-j> :bprevious<CR>
