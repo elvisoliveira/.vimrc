@@ -47,6 +47,7 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'ryanoasis/vim-devicons'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'bling/vim-bufferline'
+Plugin 'vim-syntastic/syntastic'
 Plugin 'vim-airline/vim-airline'
 call vundle#end()
 
@@ -98,3 +99,16 @@ map <C-b> :CtrlPBuffer<CR>
 map <C-k> :bnext<CR>
 map <C-j> :bprevious<CR>
 map <C-x> :bp!\|bd #<CR>
+
+" Syntastics Basic Settings
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+
+" Vim Bufferline
+let g:bufferline_echo = 0
