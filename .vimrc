@@ -22,8 +22,10 @@ set guioptions-=L "remove left-hand scroll bar
 syntax enable
 colorscheme desert
 
-" Convert tabs to spaces.
-set tabstop=4 shiftwidth=4 expandtab
+" Indent Setup
+set tabstop=4
+set shiftwidth=4
+set expandtab
 
 " Show line numbers.
 set number relativenumber
