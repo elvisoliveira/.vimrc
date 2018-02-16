@@ -49,6 +49,7 @@ Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'bling/vim-bufferline'
 Plugin 'vim-syntastic/syntastic'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plugin 'octref/RootIgnore'
 Plugin 'vim-airline/vim-airline'
 call vundle#end()
 
