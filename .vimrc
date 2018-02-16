@@ -12,6 +12,11 @@ set noswapfile
 scriptencoding utf-8
 set encoding=utf-8
 
+" GUI Settings
+set guifont=Fira\ Mono\ Medium:h10
+
+set guioptions-=r "remove right-hand scroll bar
+set guioptions-=L "remove left-hand scroll bar
 
 " Syntax Hightlight.
 syntax enable
