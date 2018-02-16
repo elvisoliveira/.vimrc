@@ -65,7 +65,8 @@ set laststatus=2
 set t_Co=256
 
 " Show all hidden characters.
-set listchars=eol:¬,tab:>·,trail:~,extends:>,precedes:<,space:·
+set listchars=eol:¬,tab:>·,trail:~,extends:>,precedes:<
+if has("patch-7.4.710") | set listchars+=space:· | endif
 set list
 
 " Turn off word wrap
