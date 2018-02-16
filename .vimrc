@@ -48,6 +48,7 @@ Plugin 'ryanoasis/vim-devicons'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'bling/vim-bufferline'
 Plugin 'vim-syntastic/syntastic'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'vim-airline/vim-airline'
 call vundle#end()
 
@@ -85,13 +86,12 @@ noremap <F4> :Autoformat php<CR>
 " NERDtree
 map <C-n> :NERDTreeToggle<CR>
 
-" enable line numbers
-let NERDTreeShowLineNumbers=1
-
-" Set NERDTree with
+" NERDTree Settings
+let g:NERDTreeShowLineNumbers=1
 let g:NERDTreeWinSize=60
+let g:NERDTreeRespectWildIgnore=1
 
-" make sure relative line numbers are used
+" NERDTree Relative Numbers
 autocmd FileType nerdtree setlocal relativenumber
 
 " ControlP Buffer
