@@ -96,3 +96,4 @@ autocmd FileType nerdtree setlocal relativenumber
 map <C-b> :CtrlPBuffer<CR>
 map <C-k> :bnext<CR>
 map <C-j> :bprevious<CR>
+map <C-x> :bp!\|bd #<CR>
