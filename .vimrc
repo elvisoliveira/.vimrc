@@ -47,12 +47,8 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'ryanoasis/vim-devicons'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'bling/vim-bufferline'
+Plugin 'vim-airline/vim-airline'
 call vundle#end()
-
-" Set PowerLine plugin:
-" Don't forget to create the symbolic link inside ~/.vim
-" ln -s /path/to/site-packages ~/.vim/
-set rtp+=~/.vim/site-packages/powerline/bindings/vim/
 
 " Always show statusline.
 set laststatus=2
