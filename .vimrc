@@ -68,13 +68,11 @@ autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 " CtrlP Showing hidden files.
 let g:ctrlp_show_hidden = 1
 
-" Copy system wide.
+" Clipboard Settings
 set clipboard=unnamed
 
-" ctrl-x for cut
-vmap <C-x> :!pbcopy<CR>
-" ctrl-c for copy
-vmap <C-c> :w !pbcopy<CR><CR>
+vmap <C-x> :!pbcopy<CR>       " ctrl-x for cut
+vmap <C-c> :w !pbcopy<CR><CR> " ctrl-c for copy
 
 " Autoformat
 noremap <F1> :g/^$/d<CR>
