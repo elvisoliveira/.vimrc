@@ -27,6 +27,10 @@ set tabstop=4
 set shiftwidth=4
 set expandtab
 
+" Fold Settings
+let anyfold_activate=1
+set foldlevel=0
+
 " Show line numbers.
 set number relativenumber
 
@@ -51,6 +55,7 @@ Plugin 'vim-syntastic/syntastic'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'octref/RootIgnore'
 Plugin 'vim-airline/vim-airline'
+Plugin 'pseewald/vim-anyfold'
 call vundle#end()
 
 " Always show statusline.
