@@ -12,8 +12,6 @@ set noswapfile
 scriptencoding utf-8
 set encoding=utf-8
 
-" 0ms for key sequences.
-set timeoutlen=1000 ttimeoutlen=0
 
 " Syntax Hightlight.
 syntax enable
