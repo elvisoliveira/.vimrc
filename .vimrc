@@ -88,7 +88,6 @@ vmap <C-x> :!pbcopy<CR>       " ctrl-x for cut
 vmap <C-c> :w !pbcopy<CR><CR> " ctrl-c for copy
 
 " Autoformat
-noremap <F1> :g/^$/d<CR>
 noremap <F2> :Autoformat html<CR>
 noremap <F3> :Autoformat css<CR>
 noremap <F4> :Autoformat php<CR>
@@ -122,3 +121,6 @@ let g:syntastic_check_on_wq = 0
 
 " Vim Bufferline
 let g:bufferline_echo = 0
+
+" Show filepath.
+noremap <F1> :echo resolve(expand('%:p'))<CR>
