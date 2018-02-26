@@ -59,6 +59,8 @@ Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'octref/RootIgnore'
 Plugin 'vim-airline/vim-airline'
 Plugin 'pseewald/vim-anyfold'
+Plugin 'godlygeek/tabular'
+Plugin 'tpope/vim-obsession'
 call vundle#end()
 
 " Always show statusline.
@@ -103,7 +105,7 @@ let g:NERDTreeRespectWildIgnore=1
 " NERDTree Relative Numbers
 autocmd FileType nerdtree setlocal relativenumber
 
-" ControlP Buffer
+" Buffer Control
 map <C-b> :CtrlPBuffer<CR>
 map <C-k> :bnext<CR>
 map <C-j> :bprevious<CR>
