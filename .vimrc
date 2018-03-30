@@ -25,6 +25,9 @@ set guioptions-=L "remove left-hand scroll bar
 syntax enable
 colorscheme desert
 
+" Code on 130 columns
+set colorcolumn=130
+
 " Indent Setup
 set tabstop=4
 set shiftwidth=4
@@ -58,9 +61,10 @@ Plugin 'vim-syntastic/syntastic'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'octref/RootIgnore'
 Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
 Plugin 'pseewald/vim-anyfold'
 Plugin 'godlygeek/tabular'
-Plugin 'tpope/vim-obsession'
+Plugin 'vim-vdebug/vdebug'
 call vundle#end()
 
 " Always show statusline.
@@ -75,7 +79,7 @@ if has("patch-7.4.710") | set listchars+=space:· | endif
 set list
 
 " Turn off word wrap
-set wrap!
+" set wrap!
 
 " Disable automatic comment insertion
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
@@ -126,3 +130,6 @@ let g:bufferline_echo = 0
 
 " Show filepath.
 noremap <F1> :echo resolve(expand('%:p'))<CR>
+
+" Airline Theme
+let g:airline_theme='luna'
