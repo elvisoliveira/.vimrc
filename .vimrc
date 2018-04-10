@@ -93,11 +93,6 @@ set clipboard=unnamed
 vmap <C-x> :!pbcopy<CR>       " ctrl-x for cut
 vmap <C-c> :w !pbcopy<CR><CR> " ctrl-c for copy
 
-" Autoformat
-noremap <F2> :Autoformat html<CR>
-noremap <F3> :Autoformat css<CR>
-noremap <F4> :Autoformat php<CR>
-
 " NERDtree
 map <C-n> :NERDTreeToggle<CR>
 
