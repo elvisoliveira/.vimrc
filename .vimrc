@@ -6,7 +6,9 @@
 set cursorline
 
 " Set bash as default shell.
-set shell=/bin/bash
+if !has('win32')
+    set shell=/bin/bash
+endif
 
 " No Swap files.
 set noswapfile
