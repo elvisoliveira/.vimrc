@@ -95,6 +95,9 @@ let g:ctrlp_show_hidden = 1
 " Clipboard Settings
 set clipboard=unnamed
 
+" Fix unsaved buffer warning when switching between them.
+set hidden
+
 vmap <C-x> :!pbcopy<CR>       " ctrl-x for cut
 vmap <C-c> :w !pbcopy<CR><CR> " ctrl-c for copy
 
