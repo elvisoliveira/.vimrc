@@ -39,6 +39,9 @@ set expandtab
 let anyfold_activate=1
 set foldlevel=0
 
+" Normalize backspace behavior
+set backspace=indent,eol,start
+
 " Show line numbers.
 set number relativenumber
 
