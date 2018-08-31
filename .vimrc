@@ -108,6 +108,7 @@ map <C-n> :NERDTreeToggle<CR>
 let g:NERDTreeShowLineNumbers=1
 let g:NERDTreeWinSize=60
 let g:NERDTreeRespectWildIgnore=1
+let g:NERDTreeShowHidden=1
 
 " NERDTree Relative Numbers
 autocmd FileType nerdtree setlocal relativenumber
