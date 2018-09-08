@@ -57,7 +57,6 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'Chiel92/vim-autoformat'
-Plugin 'mattn/emmet-vim'
 Plugin 'scrooloose/nerdtree'
 Plugin 'ryanoasis/vim-devicons'
 Plugin 'ctrlpvim/ctrlp.vim'
@@ -67,9 +66,8 @@ Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'octref/RootIgnore'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
-Plugin 'pseewald/vim-anyfold'
 Plugin 'godlygeek/tabular'
-Plugin 'vim-vdebug/vdebug'
+Plugin 'itchyny/vim-cursorword'
 call vundle#end()
 
 " Always show statusline.
