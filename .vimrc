@@ -96,11 +96,19 @@ set clipboard=unnamed
 " Fix unsaved buffer warning when switching between them.
 set hidden
 
-vmap <C-x> :!pbcopy<CR>       " ctrl-x for cut
-vmap <C-c> :w !pbcopy<CR><CR> " ctrl-c for copy
+" ctrl-x for cut
+" ctrl-c for copy
+if has("win64") || has("win32") || has("win16") || IsWSL()
+    vmap <C-x> :!clip.exe<CR>
+    vmap <C-c> :w !clip.exe<CR><CR>
+else
+    vmap <C-x> :!pbcopy<CR>
+    vmap <C-c> :w !pbcopy<CR><CR>
+endif
 
 " NERDtree
 map <C-n> :NERDTreeToggle<CR>
+map <C-r> :NERDTreeFind<CR>
 
 " NERDTree Settings
 let g:NERDTreeShowLineNumbers=1
@@ -137,3 +145,14 @@ noremap <F1> :echo resolve(expand('%:p'))<CR>
 
 " Airline Theme
 let g:airline_theme='luna'
+
+" Check WSL
+function! IsWSL()
+	if has("unix")
+		let lines = readfile("/proc/version")
+		if lines[0] =~ "Microsoft"
+			return 1
+		endif
+	endif
+	return 0
+endfunction
