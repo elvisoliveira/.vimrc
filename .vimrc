@@ -2,6 +2,17 @@
 " Author: Elvis Oliveira - http://github.com/elvisoliveira "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" Check WSL
+function! IsWSL()
+	if has("unix")
+		let lines = readfile("/proc/version")
+		if lines[0] =~ "Microsoft"
+			return 1
+		endif
+	endif
+	return 0
+endfunction
+
 " Add line on cursor
 set cursorline
 
@@ -145,14 +156,3 @@ noremap <F1> :echo resolve(expand('%:p'))<CR>
 
 " Airline Theme
 let g:airline_theme='luna'
-
-" Check WSL
-function! IsWSL()
-	if has("unix")
-		let lines = readfile("/proc/version")
-		if lines[0] =~ "Microsoft"
-			return 1
-		endif
-	endif
-	return 0
-endfunction
