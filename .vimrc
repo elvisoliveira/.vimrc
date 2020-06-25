@@ -79,6 +79,9 @@ Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'godlygeek/tabular'
 Plugin 'itchyny/vim-cursorword'
+" Vim Obsesion comes with windows-style line breaks
+" it must be converted on ~/.vim/bundle/vim-obsession/plugin/obsession.vim
+Plugin 'tpope/vim-obsession'
 call vundle#end()
 
 " Always show statusline.
