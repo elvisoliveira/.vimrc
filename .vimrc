@@ -25,15 +25,22 @@ function! VimGrep()
     "    % Current document
     "  ./* Current dir files
     " ./** Current and child dir files
-    let path = input('Path: ', '%')
+    let path = input('Path: ', './**')
     execute printf(':noautocmd vimgrep /%s/j %s', search, path)
     copen
 endfunction
 
-function! SetClipboard()
+function! SetXselClipboard()
     for i in ["primary", "secondary", "clipboard"]
         execute printf('call system("xsel --%s --input", "%s")', i, GetSelectedText())
     endfor
+endfunction
+
+function! SetPath()
+    let nerd_root = g:NERDTree.ForCurrentTab().getRoot().path.str()
+    if strlen(nerd_root)
+        exec "cd ".nerd_root
+    endif
 endfunction
 
 function! ToggleMouse()
@@ -94,7 +101,7 @@ set guioptions-=L "remove left-hand scroll bar
 
 " Syntax Hightlight.
 syntax enable
-colorscheme murphy
+colorscheme desert
 
 " Code on 130 columns
 set colorcolumn=130
@@ -125,25 +132,30 @@ set rtp+=~/.vim/bundle/Vundle.vim
 
 call vundle#begin()
     Plugin 'VundleVim/Vundle.vim'
-    " Plugin 'Chiel92/vim-autoformat'
-    " Plugin 'prettier/vim-prettier'
     Plugin 'scrooloose/nerdtree'
-    Plugin 'ryanoasis/vim-devicons'
-    " Plugin 'ctrlpvim/ctrlp.vim'
     Plugin 'bling/vim-bufferline'
     Plugin 'Xuyuanp/nerdtree-git-plugin'
+    Plugin 'ryanoasis/vim-devicons'
+    Plugin 'airblade/vim-gitgutter'
     " Plugin 'octref/RootIgnore'
     Plugin 'vim-airline/vim-airline'
     Plugin 'vim-airline/vim-airline-themes'
     Plugin 'godlygeek/tabular'
     Plugin 'itchyny/vim-cursorword'
     Plugin 'roxma/vim-paste-easy'
-    " Plugin 'mg979/vim-visual-multi'
     Plugin 'jeetsukumaran/vim-buffergator'
     " Vim Obsesion comes with windows-style line breaks
     " it must be converted on ~/.vim/bundle/vim-obsession/plugin/obsession.vim
     Plugin 'tpope/vim-obsession'
 call vundle#end()
+
+" Git Gutter
+highlight GitGutterAdd    guifg=#009900 ctermfg=2
+highlight GitGutterChange guifg=#bbbb00 ctermfg=3
+highlight GitGutterDelete guifg=#ff2222 ctermfg=1
+
+let g:gitgutter_enabled = 1
+let g:gitgutter_map_keys = 0
 
 " Always show statusline.
 set laststatus=2
@@ -159,19 +171,18 @@ set list
 " Disable automatic comment insertion.
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
-" CtrlP Showing hidden files.
-let g:ctrlp_show_hidden = 1
-
 " Fix unsaved buffer warning when switching between them.
 set hidden
 
 " ctrl-c for copy
-if has("win64") || has("win32") || has("win16") || IsWSL()
-    vmap <C-c> :w !clip.exe<CR><CR>
+if has("gui_running")
+    vmap <C-c> "+y
 elseif executable("xsel")
-    vmap <C-c> :call SetClipboard()<CR><ESC>
+    vmap <C-c> :call SetXselClipboard()<CR><ESC>
 elseif executable("pbcopy")
     vmap <C-c> :w !pbcopy<CR><CR>
+elseif has("win64") || has("win32") || has("win16") || IsWSL()
+    vmap <C-c> :w !clip.exe<CR><CR>
 endif
 
 " NERDtree
@@ -208,6 +219,14 @@ noremap <F2> :set wrap!<CR>
 " Toggle mouse
 noremap <F3> :call ToggleMouse()<CR>
 
+noremap <F4> :call SetPath()<CR>
+
+" Remove empty lines
+noremap <F5> :g/\v(^\s\t*$)/d<CR>
+
+" Trim line endings
+noremap <F6> :%s/\v(\s+$\|\t+$)//g<CR>
+
 " Open buffer on external editor
 noremap <F9> :silent exec "!(notepadpp % &) > /dev/null"<CR>
 
@@ -233,16 +252,14 @@ vmap > >gv
 " nmap <C-k> <C-w>k
 " nmap <C-l> <C-w>l
 
-" nmap <s-h> :vertical resize +1<CR>
-" nmap <s-l> :vertical resize -1<CR>
-" nmap <s-j> :resize +1<CR>
-" nmap <s-k> :resize -1<CR>
+nmap <A-h> :vertical resize +1<CR>
+nmap <A-l> :vertical resize -1<CR>
+nmap <A-j> :resize +1<CR>
+nmap <A-k> :resize -1<CR>
 
 nnoremap <PageUp> 10k
 nnoremap <PageDown> 10j
 nnoremap <Home> ^
-
-" let g:prettier#config#print_width = 9999
 
 " Ctrl + Arrow to skip words
 execute "set <xUp>=\e[1;*A"
@@ -250,8 +267,4 @@ execute "set <xDown>=\e[1;*B"
 execute "set <xRight>=\e[1;*C"
 execute "set <xLeft>=\e[1;*D"
 
-let g:VM_maps = {}
-let g:VM_maps["Select Cursor Down"] = '<S-A-Down>' " start selecting down
-let g:VM_maps["Select Cursor Up"] = '<S-A-Up>' " start selecting up
-let g:VM_maps["Find Under"] = ''
-let g:VM_maps["Find Subword Under"] = ''
+" When running large amounts of recorded actions, to improve performance use ":set lazyredraw"
