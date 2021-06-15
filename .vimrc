@@ -75,6 +75,15 @@ function! ToggleFileEncoding()
     endif
 endfunction
 
+function! SidebarOpen()
+	let b = bufnr("%")
+	execute "BuffergatorOpen"
+	wincmd l
+	execute "TagbarOpen"
+	execute (bufwinnr(b) . "wincmd w")
+	execute ":set number!"
+endfunction
+
 " Add line on cursor
 set cursorline
 
@@ -107,9 +116,9 @@ colorscheme desert
 set colorcolumn=130
 
 " Indent Setup
-set tabstop=4
-set shiftwidth=4
-set expandtab
+ set tabstop=4
+ set shiftwidth=4
+" set expandtab
 
 " Fold Settings
 set foldmethod=indent
@@ -131,22 +140,25 @@ filetype plugin indent on
 set rtp+=~/.vim/bundle/Vundle.vim
 
 call vundle#begin()
-    Plugin 'VundleVim/Vundle.vim'
-    Plugin 'scrooloose/nerdtree'
-    Plugin 'bling/vim-bufferline'
-    Plugin 'Xuyuanp/nerdtree-git-plugin'
-    Plugin 'ryanoasis/vim-devicons'
-    Plugin 'airblade/vim-gitgutter'
-    " Plugin 'octref/RootIgnore'
-    Plugin 'vim-airline/vim-airline'
-    Plugin 'vim-airline/vim-airline-themes'
-    Plugin 'godlygeek/tabular'
-    Plugin 'itchyny/vim-cursorword'
-    Plugin 'roxma/vim-paste-easy'
-    Plugin 'jeetsukumaran/vim-buffergator'
-    " Vim Obsesion comes with windows-style line breaks
-    " it must be converted on ~/.vim/bundle/vim-obsession/plugin/obsession.vim
-    Plugin 'tpope/vim-obsession'
+	Plugin 'VundleVim/Vundle.vim'
+	Plugin 'scrooloose/nerdtree'
+	Plugin 'bling/vim-bufferline'
+	Plugin 'Xuyuanp/nerdtree-git-plugin'
+	Plugin 'ryanoasis/vim-devicons'
+	Plugin 'airblade/vim-gitgutter'
+	" Plugin 'octref/RootIgnore'
+	Plugin 'vim-airline/vim-airline'
+	Plugin 'vim-airline/vim-airline-themes'
+	Plugin 'godlygeek/tabular'
+	Plugin 'itchyny/vim-cursorword'
+	Plugin 'roxma/vim-paste-easy'
+	Plugin 'jeetsukumaran/vim-buffergator'
+	Plugin 'ycm-core/YouCompleteMe'
+	Plugin 'preservim/tagbar'
+	Plugin 't9md/vim-choosewin'
+	Plugin 'breuckelen/vim-resize'
+	Plugin 'tpope/vim-fugitive'
+	Plugin 'mhinz/vim-startify'
 call vundle#end()
 
 " Git Gutter
@@ -185,15 +197,36 @@ elseif has("win64") || has("win32") || has("win16") || IsWSL()
     vmap <C-c> :w !clip.exe<CR><CR>
 endif
 
+" Tagbar
+let g:tagbar_vertical = 25
+let g:tagbar_compact = 1
+let g:tagbar_autoshowtag = 1
+let g:tagbar_iconchars = ['▸', '▾']
+let g:tagbar_map_jump = 'o'
+let g:tagbar_map_closeallfolds = ['_', 'zM',]
+let g:tagbar_map_togglefold = ['<space>', 'za']
+
 " NERDtree
 map <C-n> :NERDTreeToggle<CR>
 map <C-f> :NERDTreeFind<CR>
 
+let g:buffergator_viewport_split_policy="R"
+let g:buffergator_show_full_directory_path=0
+let g:buffergator_autodismiss_on_select=0
+let g:buffergator_autoupdate=1
+let g:buffergator_show_full_directory_path="bufname"
+
+"" Buffer Navigation
+" Toggle left sidebar: NERDTree and BufferGator
+au VimEnter * call SidebarOpen()
+
 " NERDTree Settings
+let g:NERDTreeMinimalUI=1
 let g:NERDTreeShowLineNumbers=1
 let g:NERDTreeWinSize=60
 let g:NERDTreeRespectWildIgnore=1
 let g:NERDTreeShowHidden=1
+let g:NERDTreeChDirMode=2
 
 " NERDTree Relative Numbers
 autocmd FileType nerdtree setlocal relativenumber
@@ -204,6 +237,7 @@ map <C-o> :BuffergatorToggle<CR>
 map <C-k> :bnext<CR>
 map <C-j> :bprevious<CR>
 map <C-x> :bp!\|bd #<CR>
+map <C-h> :b#<CR>
 
 " Vim Bufferline
 let g:bufferline_echo = 0
@@ -252,10 +286,15 @@ vmap > >gv
 " nmap <C-k> <C-w>k
 " nmap <C-l> <C-w>l
 
-nmap <A-h> :vertical resize +1<CR>
-nmap <A-l> :vertical resize -1<CR>
-nmap <A-j> :resize +1<CR>
-nmap <A-k> :resize -1<CR>
+" nmap <C-Right> :vertical resize +1<CR>
+" nmap <C-Left> :vertical resize -1<CR>
+" nmap <C-Up> :resize +1<CR>
+" nmap <C-Down> :resize -1<CR>
+
+nmap <C-Right> :CmdResizeRight<CR>
+nmap <C-Left> :CmdResizeLeft<CR>
+nmap <C-Up> :CmdResizeUp<CR>
+nmap <C-Down> :CmdResizeDown<CR>
 
 nnoremap <PageUp> 10k
 nnoremap <PageDown> 10j
@@ -266,5 +305,24 @@ execute "set <xUp>=\e[1;*A"
 execute "set <xDown>=\e[1;*B"
 execute "set <xRight>=\e[1;*C"
 execute "set <xLeft>=\e[1;*D"
+
+let g:ycm_auto_hover = -1
+let g:ycm_key_list_select_completion = ['<TAB>']
+let g:ycm_key_list_previous_completion = ['<Up>']
+let g:ycm_key_list_next_completion = ['<Down>']
+
+nmap <C-a>1 :YcmCompleter GoTo<CR>
+nmap <C-a>2 :YcmShowDetailedDiagnostic<CR>
+nmap <C-a>3 :YcmForceCompileAndDiagnostics<CR>
+nmap <C-a>4 :YcmCompleter GoToReferences<CR>
+
+set completeopt=menu,popup
+
+let g:choosewin_label = '23456'
+let g:choosewin_overlay_enable = 0
+let g:choosewin_keymap   = {}
+let g:choosewin_keymap.w = 'previous'
+
+map <C-w><C-w> :ChooseWin<CR>
 
 " When running large amounts of recorded actions, to improve performance use ":set lazyredraw"
