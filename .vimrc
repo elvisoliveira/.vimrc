@@ -20,16 +20,6 @@ function! GetSelectedText()
     return substitute(result, '/', '\\/', 'g')
 endfunc
 
-function! VimGrep()
-    let search = input('Search: ', expand(GetSelectedText()))
-    "    % Current document
-    "  ./* Current dir files
-    " ./** Current and child dir files
-    let path = input('Path: ', './**')
-    execute printf(':noautocmd vimgrep /%s/j %s', search, path)
-    copen
-endfunction
-
 function! SetXselClipboard()
     for i in ["primary", "secondary", "clipboard"]
         execute printf('call system("xsel --%s --input", "%s")', i, GetSelectedText())
@@ -37,7 +27,8 @@ function! SetXselClipboard()
 endfunction
 
 function! SetPath()
-    let nerd_root = g:NERDTree.ForCurrentTab().getRoot().path.str()
+    let nerd_root = g:NERDTreeFileNode.GetSelected().path.str()
+	echo nerd_root
     if strlen(nerd_root)
         exec "cd ".nerd_root
     endif
@@ -86,8 +77,6 @@ endfunction
 
 " Add line on cursor
 set cursorline
-
-noremap <C-g> :call VimGrep()<CR>
 
 " Set bash as default shell.
 if !has('win32')
@@ -159,6 +148,8 @@ call vundle#begin()
 	Plugin 'breuckelen/vim-resize'
 	Plugin 'tpope/vim-fugitive'
 	Plugin 'mhinz/vim-startify'
+	Plugin 'mhinz/vim-grepper'
+	Plugin 'junegunn/fzf'
 call vundle#end()
 
 " Git Gutter
@@ -186,6 +177,9 @@ autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 " Fix unsaved buffer warning when switching between them.
 set hidden
 
+" Wrap off
+set wrap!
+
 " ctrl-c for copy
 if has("gui_running")
     vmap <C-c> "+y
@@ -207,9 +201,20 @@ let g:tagbar_map_closeallfolds = ['_', 'zM',]
 let g:tagbar_map_togglefold = ['<space>', 'za']
 
 " NERDtree
+let g:NERDTreeMinimalUI=1
+let g:NERDTreeShowLineNumbers=1
+let g:NERDTreeWinSize=60
+let g:NERDTreeRespectWildIgnore=1
+let g:NERDTreeShowHidden=1
+let g:NERDTreeChDirMode=2
+
 map <C-n> :NERDTreeToggle<CR>
 map <C-f> :NERDTreeFind<CR>
 
+" NERDTree Relative Numbers
+autocmd FileType nerdtree setlocal relativenumber
+
+" Buffergator
 let g:buffergator_viewport_split_policy="R"
 let g:buffergator_show_full_directory_path=0
 let g:buffergator_autodismiss_on_select=0
@@ -219,17 +224,6 @@ let g:buffergator_show_full_directory_path="bufname"
 "" Buffer Navigation
 " Toggle left sidebar: NERDTree and BufferGator
 au VimEnter * call SidebarOpen()
-
-" NERDTree Settings
-let g:NERDTreeMinimalUI=1
-let g:NERDTreeShowLineNumbers=1
-let g:NERDTreeWinSize=60
-let g:NERDTreeRespectWildIgnore=1
-let g:NERDTreeShowHidden=1
-let g:NERDTreeChDirMode=2
-
-" NERDTree Relative Numbers
-autocmd FileType nerdtree setlocal relativenumber
 
 " Buffer Control
 " map <C-b> :CtrlPBuffer<CR>
@@ -253,6 +247,7 @@ noremap <F2> :set wrap!<CR>
 " Toggle mouse
 noremap <F3> :call ToggleMouse()<CR>
 
+" Set path on NERDTree
 noremap <F4> :call SetPath()<CR>
 
 " Remove empty lines
@@ -260,6 +255,12 @@ noremap <F5> :g/\v(^\s\t*$)/d<CR>
 
 " Trim line endings
 noremap <F6> :%s/\v(\s+$\|\t+$)//g<CR>
+
+" Fuzzyfinder
+noremap <F7> :FZF<CR>
+
+" GREP
+noremap <F8> :Grepper -query<CR>
 
 " Open buffer on external editor
 noremap <F9> :silent exec "!(notepadpp % &) > /dev/null"<CR>
@@ -281,16 +282,6 @@ vmap < <gv
 vmap > >gv
 
 " Change buffer
-" nmap <C-h> <C-w>h
-" nmap <C-j> <C-w>j
-" nmap <C-k> <C-w>k
-" nmap <C-l> <C-w>l
-
-" nmap <C-Right> :vertical resize +1<CR>
-" nmap <C-Left> :vertical resize -1<CR>
-" nmap <C-Up> :resize +1<CR>
-" nmap <C-Down> :resize -1<CR>
-
 nmap <C-Right> :CmdResizeRight<CR>
 nmap <C-Left> :CmdResizeLeft<CR>
 nmap <C-Up> :CmdResizeUp<CR>
@@ -306,16 +297,21 @@ execute "set <xDown>=\e[1;*B"
 execute "set <xRight>=\e[1;*C"
 execute "set <xLeft>=\e[1;*D"
 
+" YCM
 let g:ycm_auto_hover = -1
 let g:ycm_key_list_select_completion = ['<TAB>']
 let g:ycm_key_list_previous_completion = ['<Up>']
 let g:ycm_key_list_next_completion = ['<Down>']
+
+" Disable YCM at vim start
+" let·g:loaded_youcompleteme·=·1
 
 nmap <C-a>1 :YcmCompleter GoTo<CR>
 nmap <C-a>2 :YcmShowDetailedDiagnostic<CR>
 nmap <C-a>3 :YcmForceCompileAndDiagnostics<CR>
 nmap <C-a>4 :YcmCompleter GoToReferences<CR>
 
+" ChooseWin
 set completeopt=menu,popup
 
 let g:choosewin_label = '23456'
@@ -326,3 +322,10 @@ let g:choosewin_keymap.w = 'previous'
 map <C-w><C-w> :ChooseWin<CR>
 
 " When running large amounts of recorded actions, to improve performance use ":set lazyredraw"
+let g:fzf_layout = { 'down': '40%' }
+
+" Git Gutter
+highlight GitGutterAdd          ctermfg=green  ctermbg=16 cterm=bold guifg=green  guibg=#000000 gui=bold
+highlight GitGutterChange       ctermfg=yellow ctermbg=16 cterm=bold guifg=yellow guibg=#000000 gui=bold
+highlight GitGutterDelete       ctermfg=red    ctermbg=16 cterm=bold guifg=red    guibg=#000000 gui=bold
+highlight GitGutterChangeDelete ctermfg=yellow ctermbg=16 cterm=bold guifg=yellow guibg=#000000 gui=bold
