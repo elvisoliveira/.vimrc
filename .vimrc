@@ -150,6 +150,7 @@ call vundle#begin()
 	Plugin 'mhinz/vim-startify'
 	Plugin 'mhinz/vim-grepper'
 	Plugin 'junegunn/fzf'
+	Plugin 'christoomey/vim-tmux-navigator'
 call vundle#end()
 
 " Git Gutter
@@ -227,11 +228,39 @@ au VimEnter * call SidebarOpen()
 
 " Buffer Control
 " map <C-b> :CtrlPBuffer<CR>
-map <C-o> :BuffergatorToggle<CR>
-map <C-k> :bnext<CR>
-map <C-j> :bprevious<CR>
-map <C-x> :bp!\|bd #<CR>
-map <C-h> :b#<CR>
+" map <C-o> :BuffergatorToggle<CR>
+
+" map <C-k> :bnext<CR>
+" map <C-j> :bprevious<CR>
+" map <C-x> :bp!\|bd #<CR>
+" map <C-h> :b#<CR>
+
+map <C-k> :call BufferActions('next')<CR>
+map <C-j> :call BufferActions('previous')<CR>
+map <C-x> :call BufferActions('close')<CR>
+map <C-h> :call BufferActions('alternate')<CR>
+
+function! BufferActions(action)
+	if bufname("%") =~ 'NERD_tree_'
+		return 0
+	endif
+	if bufname("%") =~ 'Tagbar'
+		return 0
+	endif
+	if bufname("%") =~ 'buffergator'
+		return 0
+	endif
+
+	if a:action == 'next'
+		execute ':bnext'
+	elseif a:action == 'previous'
+		execute ':bprevious'
+	elseif a:action == 'close'
+		execute ':bp!\|bd #'
+	elseif a:action == 'alternate'
+		execute ':b#'
+	endif
+endfunc
 
 " Vim Bufferline
 let g:bufferline_echo = 0
@@ -329,3 +358,11 @@ highlight GitGutterAdd          ctermfg=green  ctermbg=16 cterm=bold guifg=green
 highlight GitGutterChange       ctermfg=yellow ctermbg=16 cterm=bold guifg=yellow guibg=#000000 gui=bold
 highlight GitGutterDelete       ctermfg=red    ctermbg=16 cterm=bold guifg=red    guibg=#000000 gui=bold
 highlight GitGutterChangeDelete ctermfg=yellow ctermbg=16 cterm=bold guifg=yellow guibg=#000000 gui=bold
+
+let g:tmux_navigator_no_mappings = 1
+
+nnoremap <silent> <C-b>h :TmuxNavigateLeft<CR>
+nnoremap <silent> <C-b>j :TmuxNavigateDown<CR>
+nnoremap <silent> <C-b>k :TmuxNavigateUp<CR>
+nnoremap <silent> <C-b>l :TmuxNavigateRight<CR>
+" nnoremap <silent> <C-b>h :TmuxNavigatePrevious<CR>
