@@ -75,6 +75,21 @@ function! SidebarOpen()
 	execute ":set number!"
 endfunction
 
+function! RemoveDuplicateLines()
+    let lines={}
+    let result=[]
+    for lineno in range(line('$'))
+        let line=getline(lineno+1)
+        if (!has_key(lines, line))
+            let lines[line] = 1
+            let result += [ line ]
+        endif
+    endfor
+    %d
+    call append(0, result)
+    d
+endfunction
+
 " Add line on cursor
 set cursorline
 
@@ -117,7 +132,7 @@ set nofoldenable
 set backspace=indent,eol,start
 
 " Show line numbers.
-set number relativenumber
+set relativenumber
 
 " Vundle requirements:
 set nocompatible
@@ -151,15 +166,21 @@ call vundle#begin()
 	Plugin 'mhinz/vim-grepper'
 	Plugin 'junegunn/fzf'
 	Plugin 'christoomey/vim-tmux-navigator'
+	Plugin 'dansomething/vim-eclim'
+	Plugin 'moll/vim-bbye'
+	Plugin 'puremourning/vimspector'
+	Plugin 'szw/vim-maximizer'
 call vundle#end()
 
 " Git Gutter
-highlight GitGutterAdd    guifg=#009900 ctermfg=2
-highlight GitGutterChange guifg=#bbbb00 ctermfg=3
-highlight GitGutterDelete guifg=#ff2222 ctermfg=1
+highlight GitGutterAdd          ctermfg=green  ctermbg=16 cterm=bold guifg=green  gui=bold
+highlight GitGutterChange       ctermfg=yellow ctermbg=16 cterm=bold guifg=yellow gui=bold
+highlight GitGutterDelete       ctermfg=red    ctermbg=16 cterm=bold guifg=red    gui=bold
+highlight GitGutterChangeDelete ctermfg=yellow ctermbg=16 cterm=bold guifg=yellow gui=bold
 
 let g:gitgutter_enabled = 1
 let g:gitgutter_map_keys = 0
+let g:gitgutter_grep_command = executable('rg') ? 'rg' : 'grep'
 
 " Always show statusline.
 set laststatus=2
@@ -241,13 +262,15 @@ map <C-x> :call BufferActions('close')<CR>
 map <C-h> :call BufferActions('alternate')<CR>
 
 function! BufferActions(action)
-	if bufname("%") =~ 'NERD_tree_'
-		return 0
-	endif
-	if bufname("%") =~ 'Tagbar'
-		return 0
-	endif
-	if bufname("%") =~ 'buffergator'
+	if (bufname("%") == 'NERD_tree_1' || 
+				\ bufname("%") == '__Tagbar__.1' || 
+				\ bufname("%") == '[[buffergator-buffers]]' || 
+				\ bufname("%") == 'vimspector.Console' || 
+				\ bufname("%") == 'vimspector.Output:stderr' || 
+				\ bufname("%") == 'vimspector.Variables' || 
+				\ bufname("%") == 'vimspector.Watches' || 
+				\ bufname("%") == 'vimspector.Variables' || 
+				\ bufname("%") == 'vimspector.StackTrace')
 		return 0
 	endif
 
@@ -256,7 +279,7 @@ function! BufferActions(action)
 	elseif a:action == 'previous'
 		execute ':bprevious'
 	elseif a:action == 'close'
-		execute ':bp!\|bd #'
+		execute ':Bdelete'
 	elseif a:action == 'alternate'
 		execute ':b#'
 	endif
@@ -273,7 +296,10 @@ noremap <F1> :echo resolve(expand('%:p'))<CR>
 " Toggle wrap
 noremap <F2> :set wrap!<CR>
 
-" Toggle mouse
+" Mouse
+" set mouse=a
+" set ttymouse=sgr
+
 noremap <F3> :call ToggleMouse()<CR>
 
 " Set path on NERDTree
@@ -292,7 +318,8 @@ noremap <F7> :FZF<CR>
 noremap <F8> :Grepper -query<CR>
 
 " Open buffer on external editor
-noremap <F9> :silent exec "!(notepadpp % &) > /dev/null"<CR>
+" noremap <F9> :silent exec "!(notepadpp % &) > /dev/null"<CR>
+noremap <F9> :call RemoveDuplicateLines()<CR>
 
 " Toggle BOM
 noremap <F10> :set bomb!<CR>
@@ -310,11 +337,16 @@ let g:airline_theme='luna'
 vmap < <gv
 vmap > >gv
 
-" Change buffer
-nmap <C-Right> :CmdResizeRight<CR>
-nmap <C-Left> :CmdResizeLeft<CR>
-nmap <C-Up> :CmdResizeUp<CR>
-nmap <C-Down> :CmdResizeDown<CR>
+" Resize Buffer
+let g:vim_resize_disable_auto_mappings = 1
+
+nmap <C-Up>    : CmdResizeUp<CR>
+nmap <C-Left>  : CmdResizeLeft<CR>
+nmap <C-Down>  : CmdResizeDown<CR>
+nmap <C-Right> : CmdResizeRight<CR>
+
+nnoremap <C-u> 10k
+nnoremap <C-d> 10j
 
 nnoremap <PageUp> 10k
 nnoremap <PageDown> 10j
@@ -331,21 +363,32 @@ let g:ycm_auto_hover = -1
 let g:ycm_key_list_select_completion = ['<TAB>']
 let g:ycm_key_list_previous_completion = ['<Up>']
 let g:ycm_key_list_next_completion = ['<Down>']
+let g:ycm_java_jdtls_extension_path = ['/home/elvisoliveira/.vim/bundle/vimspector/gadgets/linux']
+let g:ycm_filetype_whitelist = { 'java': 1 }
+let g:ycm_filetype_blacklist = { '*': 1 }
 
 " Disable YCM at vim start
 " let·g:loaded_youcompleteme·=·1
+
+" YCM + Vimspector
+" To check the state of the debugger, use :YcmDebugInfo
 
 nmap <C-a>1 :YcmCompleter GoTo<CR>
 nmap <C-a>2 :YcmShowDetailedDiagnostic<CR>
 nmap <C-a>3 :YcmForceCompileAndDiagnostics<CR>
 nmap <C-a>4 :YcmCompleter GoToReferences<CR>
 
+" Zoom
+let g:maximizer_set_default_mapping = 0
+
+map <C-z> :MaximizerToggle<CR>
+
 " ChooseWin
 set completeopt=menu,popup
 
 let g:choosewin_label = '23456'
 let g:choosewin_overlay_enable = 0
-let g:choosewin_keymap   = {}
+let g:choosewin_keymap = {}
 let g:choosewin_keymap.w = 'previous'
 
 map <C-w><C-w> :ChooseWin<CR>
@@ -353,16 +396,59 @@ map <C-w><C-w> :ChooseWin<CR>
 " When running large amounts of recorded actions, to improve performance use ":set lazyredraw"
 let g:fzf_layout = { 'down': '40%' }
 
-" Git Gutter
-highlight GitGutterAdd          ctermfg=green  ctermbg=16 cterm=bold guifg=green  guibg=#000000 gui=bold
-highlight GitGutterChange       ctermfg=yellow ctermbg=16 cterm=bold guifg=yellow guibg=#000000 gui=bold
-highlight GitGutterDelete       ctermfg=red    ctermbg=16 cterm=bold guifg=red    guibg=#000000 gui=bold
-highlight GitGutterChangeDelete ctermfg=yellow ctermbg=16 cterm=bold guifg=yellow guibg=#000000 gui=bold
-
+" TMUX
 let g:tmux_navigator_no_mappings = 1
 
 nnoremap <silent> <C-b>h :TmuxNavigateLeft<CR>
 nnoremap <silent> <C-b>j :TmuxNavigateDown<CR>
 nnoremap <silent> <C-b>k :TmuxNavigateUp<CR>
 nnoremap <silent> <C-b>l :TmuxNavigateRight<CR>
-" nnoremap <silent> <C-b>h :TmuxNavigatePrevious<CR>
+nnoremap <silent> <C-b>b :TmuxNavigatePrevious<CR>
+
+let s:jdt_ls_debugger_port = 0
+function! s:StartJavaDebugging()
+	if s:jdt_ls_debugger_port <= 0
+		" Get the DAP port
+		let s:jdt_ls_debugger_port = youcompleteme#GetCommandResponse('ExecuteCommand', 'vscode.java.startDebugSession')
+		if s:jdt_ls_debugger_port == ''
+			echom "Unable to get DAP port - is JDT.LS initialized?"
+			let s:jdt_ls_debugger_port = 0
+			return
+		else
+			echom "Assigned port is: " . s:jdt_ls_debugger_port
+			let $DEBUGGER = s:jdt_ls_debugger_port
+		endif
+	endif
+	" Start debugging with the DAP port
+	call vimspector#LaunchWithSettings({'DAPPort': s:jdt_ls_debugger_port})
+endfunction
+
+nmap <C-s>j :call <SID>StartJavaDebugging()<CR>
+
+" VimspectorContinue
+" VimspectorStop
+" VimpectorRestart
+" VimspectorPause
+nmap <C-s>1 :call vimspector#ToggleBreakpoint()<CR>
+" call vimspector#Reset()<CR>
+" VimspectorToggleConditionalBreakpoint
+" VimspectorAddFunctionBreakpoint
+" VimspectorRunToCursor
+" VimspectorStepOver
+" VimspectorStepInto
+" VimspectorStepOut
+" VimspectorUpFrame
+" VimspectorDownFrame
+" VimspectorBalloonEval
+
+let g:vimspector_sign_priority = {
+\    'vimspectorBP':         999,
+\    'vimspectorPC':         999,
+\    'vimspectorBPCond':     999,
+\    'vimspectorBPDisabled': 999,
+\ }
+
+let $FZF_DEFAULT_COMMAND = 'rg --files --hidden'
+
+map <C-\>j :tabprevious<CR>
+map <C-\>k :tabnext<CR>
