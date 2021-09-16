@@ -177,6 +177,7 @@ call vundle#begin()
 	Plugin 'moll/vim-bbye'
 	Plugin 'puremourning/vimspector'
 	Plugin 'szw/vim-maximizer'
+	Plugin 'editorconfig/editorconfig-vim'
 	Plugin 'dahu/vim-lotr'
 call vundle#end()
 
