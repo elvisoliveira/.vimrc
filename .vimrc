@@ -173,7 +173,7 @@ call vundle#begin()
 	Plugin 'mhinz/vim-grepper'
 	Plugin 'junegunn/fzf'
 	Plugin 'christoomey/vim-tmux-navigator'
-	Plugin 'dansomething/vim-eclim'
+	" Plugin 'dansomething/vim-eclim'
 	Plugin 'moll/vim-bbye'
 	Plugin 'puremourning/vimspector'
 	Plugin 'szw/vim-maximizer'
