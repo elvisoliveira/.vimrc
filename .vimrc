@@ -15,14 +15,17 @@ endfunction
 
 function! GetSelectedText()
     normal gv"xy
-    let result = substitute(getreg("x"), '"', '\\"', 'g')
+    let reg = getreg("x")
+    let reg = substitute(reg, '\', '\\\\', 'g')
+    let reg = substitute(reg, '"', '\\"', 'g')
     normal gv
-    return substitute(result, '/', '\\/', 'g')
+    return substitute(reg, '/', '\\/', 'g')
 endfunc
 
 function! SetXselClipboard()
+    let text = GetSelectedText()
     for i in ["primary", "secondary", "clipboard"]
-        execute printf('call system("xsel --%s --input", "%s")', i, GetSelectedText())
+        execute printf('call system("xsel --%s --input", "%s")', i, text)
     endfor
 endfunction
 
