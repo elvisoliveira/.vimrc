@@ -425,23 +425,39 @@ function! s:StartJavaDebugging()
 	call vimspector#LaunchWithSettings({'DAPPort': s:jdt_ls_debugger_port})
 endfunction
 
-nmap <C-s>j :call <SID>StartJavaDebugging()<CR>
+function! ToggleBreakpoint()
+	let alreadyHasBreakpoint1 = len(sign_getplaced(bufnr(), #{group:'VimspectorBP', lnum: line(".")})[0].signs) > 0
+	let alreadyHasBreakpoint2 = len(sign_getplaced(bufnr(), #{group:'VimspectorCode', lnum: line(".")})[0].signs) > 0
+	if alreadyHasBreakpoint1 || alreadyHasBreakpoint2
+		call vimspector#ToggleBreakpoint()
+	else
+		let condition = input('condition:')
+		if condition == ''
+			call vimspector#ToggleBreakpoint()
+		else
+			call vimspector#ToggleBreakpoint({'condition': condition})
+		endif
+		redraw
+	endif
+endfunction
 
-" VimspectorContinue
-" VimspectorStop
+" Leader + S = Vim[S]pector
+nmap <C-s>j :call <SID>StartJavaDebugging()<CR>
+nmap <C-s>c :call vimspector#Continue()<CR>
+nmap <C-s>s :call vimspector#Stop()<CR>
 " VimpectorRestart
 " VimspectorPause
-nmap <C-s>1 :call vimspector#ToggleBreakpoint()<CR>
-" call vimspector#Reset()<CR>
+nmap <C-s>b :call ToggleBreakpoint()<CR>
+nmap <C-s>r :call vimspector#Reset()<CR>
 " VimspectorToggleConditionalBreakpoint
 " VimspectorAddFunctionBreakpoint
 " VimspectorRunToCursor
-" VimspectorStepOver
-" VimspectorStepInto
-" VimspectorStepOut
+nmap <C-s> <Right> :call vimspector#StepOver()<CR>
+nmap <C-s> <Down> :call vimspector#StepInto()<CR>
+nmap <C-s> <Up> :call vimspector#StepOut()<CR>
 " VimspectorUpFrame
 " VimspectorDownFrame
-" VimspectorBalloonEval
+xmap <C-s>i <Plug>VimspectorBalloonEval
 
 let g:vimspector_sign_priority = {
 \    'vimspectorBP':         999,
