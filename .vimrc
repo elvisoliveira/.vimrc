@@ -271,15 +271,21 @@ map <C-x> :call BufferActions('close')<CR>
 map <C-h> :call BufferActions('alternate')<CR>
 
 function! BufferActions(action)
+	if (bufname("%") == 'vimspector.Console' || 
+				\ bufname("%") == 'vimspector.Output:stderr' || 
+				\ bufname("%") == 'vimspector.Output:server')
+		call feedkeys(":VimspectorShowOutput \<Tab>", 'tn')
+	endif
+
 	if (bufname("%") == 'NERD_tree_1' || 
 				\ bufname("%") == '__Tagbar__.1' || 
 				\ bufname("%") == '__LOTR__' || 
 				\ bufname("%") == '[[buffergator-buffers]]' || 
 				\ bufname("%") == 'vimspector.Console' || 
 				\ bufname("%") == 'vimspector.Output:stderr' || 
+				\ bufname("%") == 'vimspector.Output:server' || 
 				\ bufname("%") == 'vimspector.Variables' || 
 				\ bufname("%") == 'vimspector.Watches' || 
-				\ bufname("%") == 'vimspector.Variables' || 
 				\ bufname("%") == 'vimspector.StackTrace')
 		return 0
 	endif
@@ -374,8 +380,9 @@ let g:ycm_key_list_select_completion = ['<TAB>']
 let g:ycm_key_list_previous_completion = ['<Up>']
 let g:ycm_key_list_next_completion = ['<Down>']
 let g:ycm_java_jdtls_extension_path = ['/home/elvisoliveira/.vim/bundle/vimspector/gadgets/linux']
-let g:ycm_filetype_whitelist = { 'java': 1 }
+let g:ycm_filetype_whitelist = { 'java': 1, 'VimspectorPrompt': 1 }
 let g:ycm_filetype_blacklist = { '*': 1 }
+let g:ycm_semantic_triggers =  { 'VimspectorPrompt': [ '.', '->', ':', '<' ] }
 
 " Disable YCM at vim start
 " let·g:loaded_youcompleteme·=·1
