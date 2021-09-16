@@ -136,8 +136,8 @@ set nofoldenable
 " Normalize backspace behavior
 set backspace=indent,eol,start
 
-" Show line numbers.
-set relativenumber
+" Show hybrid line numbers.
+set number relativenumber
 
 " Vundle requirements:
 set nocompatible
