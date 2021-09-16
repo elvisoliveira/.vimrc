@@ -461,3 +461,6 @@ augroup equalalways_resized
   autocmd VimResized *
         \ if &equalalways | wincmd = | endif
 augroup END
+
+" Share yank between vim instances
+set clipboard=unnamedplus
