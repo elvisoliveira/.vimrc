@@ -394,6 +394,8 @@ nmap <C-a>1 :YcmCompleter GoTo<CR>
 nmap <C-a>2 :YcmShowDetailedDiagnostic<CR>
 nmap <C-a>3 :YcmForceCompileAndDiagnostics<CR>
 nmap <C-a>4 :YcmCompleter GoToReferences<CR>
+nmap <C-a>5 :YcmCompleter OrganizeImports<CR>
+nmap <C-a>6 :YcmCompleter FixIt<CR>
 
 " Zoom
 let g:maximizer_set_default_mapping = 0
