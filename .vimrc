@@ -74,10 +74,12 @@ endfunction
 function! SidebarOpen()
 	let b = bufnr("%")
 	execute "BuffergatorOpen"
-	wincmd l
 	execute "TagbarOpen"
+	execute "LOTROpen"
 	execute (bufwinnr(b) . "wincmd w")
-	execute ":set number!"
+	wincmd =
+augroup END
+	" execute ":set number!"
 endfunction
 
 function! RemoveDuplicateLines()
@@ -175,6 +177,7 @@ call vundle#begin()
 	Plugin 'moll/vim-bbye'
 	Plugin 'puremourning/vimspector'
 	Plugin 'szw/vim-maximizer'
+	Plugin 'dahu/vim-lotr'
 call vundle#end()
 
 " Git Gutter
@@ -269,6 +272,7 @@ map <C-h> :call BufferActions('alternate')<CR>
 function! BufferActions(action)
 	if (bufname("%") == 'NERD_tree_1' || 
 				\ bufname("%") == '__Tagbar__.1' || 
+				\ bufname("%") == '__LOTR__' || 
 				\ bufname("%") == '[[buffergator-buffers]]' || 
 				\ bufname("%") == 'vimspector.Console' || 
 				\ bufname("%") == 'vimspector.Output:stderr' || 
