@@ -35,13 +35,15 @@ function! SetPath()
 endfunction
 
 function! ToggleMouse()
-    " check if mouse is enabled
     if &mouse == 'a'
-        " disable mouse
         set mouse=
     else
-        " enable mouse everywhere
         set mouse=a
+    endif
+    if &ttymouse == 'sgr'
+        set ttymouse=
+    else
+        set ttymouse=sgr
     endif
 endfunc
 
