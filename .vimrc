@@ -464,3 +464,6 @@ augroup END
 
 " Share yank between vim instances
 set clipboard=unnamedplus
+
+" Exit Vim if Buffergator is the only window remaining in the only tab.
+autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && bufname() == "[[buffergator-buffers]]" | quit | endif
