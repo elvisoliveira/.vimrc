@@ -1,4 +1,4 @@
-﻿""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Author: Elvis Oliveira - http://github.com/elvisoliveira "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -452,5 +452,5 @@ let g:vimspector_sign_priority = {
 
 let $FZF_DEFAULT_COMMAND = 'rg --files --hidden'
 
-map <C-\>j :tabprevious<CR>
-map <C-\>k :tabnext<CR>
+map <C-l> :tabprevious<CR>
+map <C-S-l> :tabnext<CR>
