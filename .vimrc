@@ -454,3 +454,10 @@ let $FZF_DEFAULT_COMMAND = 'rg --files --hidden'
 
 map <C-l> :tabprevious<CR>
 map <C-S-l> :tabnext<CR>
+
+" Resize panes on Vim window resize
+augroup equalalways_resized
+  autocmd!
+  autocmd VimResized *
+        \ if &equalalways | wincmd = | endif
+augroup END
