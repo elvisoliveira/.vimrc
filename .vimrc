@@ -1,4 +1,4 @@
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+﻿""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Author: Elvis Oliveira - http://github.com/elvisoliveira "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -265,8 +265,8 @@ au VimEnter * call SidebarOpen()
 " map <C-x> :bp!\|bd #<CR>
 " map <C-h> :b#<CR>
 
-map <C-k> :call BufferActions('next')<CR>
-map <C-j> :call BufferActions('previous')<CR>
+map <C-j> :call BufferActions('next')<CR>
+map <C-k> :call BufferActions('previous')<CR>
 map <C-x> :call BufferActions('close')<CR>
 map <C-h> :call BufferActions('alternate')<CR>
 
