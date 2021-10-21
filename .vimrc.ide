@@ -1,0 +1,103 @@
+" Author: Elvis Oliveira - http://github.com/elvisoliveira "
+" vim: syntax=vim
+set nocompatible
+source ~/.vimrc
+
+let s:enabled = 0
+function! RightSidebarToggle()
+	let b = bufnr("%")
+	if s:enabled
+		let s:enabled = 0
+		execute "BuffergatorClose"
+		execute "TagbarClose"
+		execute "LOTRClose"
+	else
+		let s:enabled = 1
+		execute "BuffergatorOpen"
+		execute "TagbarOpen"
+		execute "LOTROpen"
+	endif
+	execute (bufwinnr(b) . "wincmd w")
+	wincmd =
+endfunc
+
+" See: https://github.com/junegunn/fzf/issues/453
+function! FZFOpen(cmd)
+	let functional_buf_types = ['quickfix', 'help', 'nofile', 'terminal']
+	if winnr('$') > 1 && (index(functional_buf_types, &bt) >= 0)
+		let norm_wins = filter(range(1, winnr('$')),
+					\ 'index(functional_buf_types, getbufvar(winbufnr(v:val), "&bt")) == -1')
+		let norm_win = !empty(norm_wins) ? norm_wins[0] : 0
+		exe norm_win . 'winc w'
+	endif
+	exe a:cmd
+endfunc
+
+" set dropdown to match solarized light
+highlight Pmenu      ctermfg=254   ctermbg=241
+highlight PmenuSel   ctermfg=254   ctermbg=136   cterm=bold
+
+" Git Gutter
+highlight GitGutterAdd          ctermfg=green  ctermbg=16 cterm=bold guifg=green  gui=bold
+highlight GitGutterChange       ctermfg=yellow ctermbg=16 cterm=bold guifg=yellow gui=bold
+highlight GitGutterDelete       ctermfg=red    ctermbg=16 cterm=bold guifg=red    gui=bold
+highlight GitGutterChangeDelete ctermfg=yellow ctermbg=16 cterm=bold guifg=yellow gui=bold
+
+let g:gitgutter_enabled = 0
+let g:gitgutter_map_keys = 0
+let g:gitgutter_grep_command = executable('rg') ? 'rg' : 'grep'
+
+" Tagbar
+let g:tagbar_vertical = 25
+let g:tagbar_compact = 1
+let g:tagbar_autoshowtag = 1
+let g:tagbar_iconchars = ['▸', '▾']
+let g:tagbar_map_jump = 'o'
+let g:tagbar_map_closeallfolds = ['_', 'zM',]
+let g:tagbar_map_togglefold = ['<space>', 'za']
+
+" Buffergator
+let g:buffergator_viewport_split_policy="R"
+let g:buffergator_show_full_directory_path=0
+let g:buffergator_autodismiss_on_select=0
+let g:buffergator_autoupdate=1
+let g:buffergator_show_full_directory_path="bufname"
+
+" Grepper
+let g:grepper = {}
+let g:grepper.quickfix = 1
+
+" ChooseWin [Removed]
+let g:choosewin_label = '23456'
+let g:choosewin_overlay_enable = 0
+let g:choosewin_keymap = {}
+let g:choosewin_keymap.w = 'previous'
+
+map <C-w><C-w> :ChooseWin<CR>
+
+" When running large amounts of recorded actions, to improve performance use ":set lazyredraw"
+let g:fzf_layout = { 'down': '40%' }
+
+let $FZF_DEFAULT_COMMAND = 'rg --files --hidden'
+
+map <C-@> :call RightSidebarToggle()<CR>
+
+" Toggle right sidebar: BufferGator, TagBar, LOTR
+autocmd VimEnter * call RightSidebarToggle()
+
+" Resize panes on Vim window resize
+autocmd VimResized * if &equalalways | wincmd = | endif
+
+" Avoid focus on right sidebar
+" autocmd BufEnter * if bufname("%") =~ "__Tagbar__\d\+" ||
+" 			\ bufname("%") == "__LOTR__" ||
+" 			\ bufname("%") == "[[buffergator-buffers]]" | wincmd p | endif
+
+" Disable automatic comment insertion.
+autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+
+" Fuzzyfinder
+noremap <F7> :call FZFOpen(':FZF')<CR>
+
+" GREP
+noremap <F8> :call FZFOpen(':Grepper -query')<CR>
