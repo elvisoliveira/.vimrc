@@ -378,6 +378,10 @@ autocmd BufReadPost quickfix noremap <silent> <buffer> o <CR>
 " AirLine
 autocmd User AirlineAfterInit call AirlineInit()
 
+if !has("gui_running")
+    hi Normal guibg=NONE ctermbg=NONE
+endif
+
 map <silent> w <Plug>CamelCaseMotion_w
 map <silent> b <Plug>CamelCaseMotion_b
 map <silent> e <Plug>CamelCaseMotion_e
