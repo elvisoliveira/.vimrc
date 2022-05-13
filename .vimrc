@@ -192,6 +192,7 @@ call vundle#begin()
     Plugin 'vim-airline/vim-airline-themes'
     Plugin 'bling/vim-bufferline'
     Plugin 'szw/vim-maximizer'
+    Plugin 'bkad/CamelCaseMotion'
     " IDE like plugins
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.ide" || v:argv[-2] =~ ".vimrc.java"))
         Plugin 'elvisoliveira/vim-lotr'
@@ -358,3 +359,13 @@ autocmd FileType nerdtree setlocal relativenumber
 
 " Open QUickfix itens with 'o' key
 autocmd BufReadPost quickfix noremap <silent> <buffer> o <CR>
+
+map <silent> w <Plug>CamelCaseMotion_w
+map <silent> b <Plug>CamelCaseMotion_b
+map <silent> e <Plug>CamelCaseMotion_e
+map <silent> ge <Plug>CamelCaseMotion_ge
+
+sunmap w
+sunmap b
+sunmap e
+sunmap ge
