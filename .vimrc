@@ -90,7 +90,7 @@ function! BufferActions(action)
         return 0
     endif
 
-    if (&buftype ==# 'quickfix')
+    if (&buftype ==# 'quickfix' || &buftype ==# 'terminal')
         return 0
     endif
 
@@ -305,7 +305,7 @@ noremap <F7> :call FZFOpen(':FZF')<CR>
 noremap <F8> :call FZFOpen(':Grepper -query')<CR>
 
 " Open buffer on external editor
-noremap <F9> :silent exec "!(geany % &) > /dev/null"<CR>
+noremap <F9> :silent exec "!(scite % &) > /dev/null"<CR>
 
 " Toggle BOM
 noremap <F10> :set bomb!<CR>
