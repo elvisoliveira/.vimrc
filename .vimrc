@@ -193,7 +193,7 @@ call vundle#begin()
     Plugin 'bling/vim-bufferline'
     Plugin 'szw/vim-maximizer'
     " IDE like plugins
-    if (v:argv[-2] =~ ".vimrc.ide" || v:argv[-2] =~ ".vimrc.java")
+    if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.ide" || v:argv[-2] =~ ".vimrc.java"))
         Plugin 'elvisoliveira/vim-lotr'
         Plugin 'preservim/tagbar'
         Plugin 'jeetsukumaran/vim-buffergator'
@@ -205,7 +205,7 @@ call vundle#begin()
         Plugin 'junegunn/fzf'
     endif
     " Only on Java [Eclipse] projects
-    if (v:argv[-2] =~ ".vimrc.java")
+    if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.java"))
         Plugin 'puremourning/vimspector'
         Plugin 'ycm-core/YouCompleteMe'
     endif
