@@ -195,6 +195,10 @@ call vundle#begin()
     Plugin 'szw/vim-maximizer'
     Plugin 'bkad/CamelCaseMotion'
     Plugin 'vim-scripts/AutoComplPop'
+    Plugin 'jiangmiao/auto-pairs'
+    " Git
+    Plugin 'tpope/vim-fugitive'
+    Plugin 'cohama/agit.vim'
     " IDE like plugins
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.ide" || v:argv[-2] =~ ".vimrc.java"))
         Plugin 'elvisoliveira/vim-lotr'
