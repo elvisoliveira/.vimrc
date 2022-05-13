@@ -1,4 +1,10 @@
 ﻿" Author: Elvis Oliveira - http://github.com/elvisoliveira "
+function! AirlineInit()
+    let g:airline_section_a = airline#section#create([])
+    let g:airline_section_x = airline#section#create(['mode'])
+    let g:airline_extensions = []
+endfunc
+
 function! IsWSL()
     " Check WSL
     if has("unix")
@@ -368,6 +374,9 @@ autocmd FileType nerdtree setlocal relativenumber
 
 " Open QUickfix itens with 'o' key
 autocmd BufReadPost quickfix noremap <silent> <buffer> o <CR>
+
+" AirLine
+autocmd User AirlineAfterInit call AirlineInit()
 
 map <silent> w <Plug>CamelCaseMotion_w
 map <silent> b <Plug>CamelCaseMotion_b
