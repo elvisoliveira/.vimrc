@@ -168,6 +168,7 @@ set nocompatible
 set clipboard=unnamedplus
 
 filetype off
+filetype plugin on
 filetype plugin indent on
 
 " Read .vimrc files of the file directory
@@ -175,7 +176,7 @@ set exrc
 set secure
 
 " Make Vim completion popup menu work just like in an IDE
-set completeopt=menu,popup
+set completeopt=menu,menuone,popup
 
 " Vundle setup:
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -193,6 +194,7 @@ call vundle#begin()
     Plugin 'bling/vim-bufferline'
     Plugin 'szw/vim-maximizer'
     Plugin 'bkad/CamelCaseMotion'
+    Plugin 'vim-scripts/AutoComplPop'
     " IDE like plugins
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.ide" || v:argv[-2] =~ ".vimrc.java"))
         Plugin 'elvisoliveira/vim-lotr'
@@ -369,3 +371,22 @@ sunmap w
 sunmap b
 sunmap e
 sunmap ge
+
+"" Omni Completion
+autocmd FileType python set omnifunc=pythoncomplete#Complete
+autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
+autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
+autocmd FileType php set omnifunc=phpcomplete#CompletePHP
+autocmd FileType c set omnifunc=ccomplete#Complete
+
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+if has("unix")
+    inoremap <C-@> <c-x><c-o>
+elseif has("win32")
+    inoremap <C-Space> <c-x><c-o>
+endif
