@@ -11,11 +11,15 @@ function! RightSidebarToggle()
 		execute "BuffergatorClose"
 		execute "TagbarClose"
 		execute "LOTRClose"
+        map <C-j> :call BufferActions('previous')<CR>
+        map <C-k> :call BufferActions('next')<CR>
 	else
 		let s:enabled = 1
 		execute "BuffergatorOpen"
 		execute "TagbarOpen"
 		execute "LOTROpen"
+        map <C-j> :call BufferActions('next')<CR>
+        map <C-k> :call BufferActions('previous')<CR>
 	endif
 	execute (bufwinnr(b) . "wincmd w")
 	wincmd =
