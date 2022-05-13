@@ -114,6 +114,9 @@ endfunc
 set cursorline
 set cursorcolumn
 
+" Don't touch end of file
+set nofixendofline
+
 " Set bash as default shell.
 if !has('win32')
     set shell=/bin/bash
