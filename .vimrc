@@ -174,7 +174,11 @@ set number relativenumber
 set nocompatible
 
 " Share yank between vim instances
-set clipboard=unnamedplus
+if system('uname -s') == "Darwin\n"
+  set clipboard=unnamed "OSX
+else
+  set clipboard=unnamedplus "Linux
+endif
 
 filetype off
 filetype plugin on
