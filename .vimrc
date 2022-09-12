@@ -1,8 +1,36 @@
-﻿" Author: Elvis Oliveira - http://github.com/elvisoliveira "
+" Author: Elvis Oliveira - http://github.com/elvisoliveira "
+let s:enabled = 0
+function! RightSidebarToggle()
+	let b = bufnr("%")
+	if s:enabled
+		let s:enabled = 0
+		execute "BuffergatorClose"
+	else
+		let s:enabled = 1
+		execute "BuffergatorOpen"
+	endif
+	execute (bufwinnr(b) . "wincmd w")
+	wincmd =
+endfunc
+
 function! AirlineInit()
-    let g:airline_section_a = airline#section#create([])
-    let g:airline_section_x = airline#section#create(['mode'])
-    let g:airline_extensions = []
+    " let g:airline_section_a = airline#section#create(['file'])
+    " let g:airline_section_b = airline#section#create([])
+    let g:airline_section_c = airline#section#create(['%f'])
+    " let g:airline_section_x = airline#section#create(['mode'])
+    " let g:airline_extensions = []
+endfunc
+
+" See: https://github.com/junegunn/fzf/issues/453
+function! FZFOpen(cmd)
+	let functional_buf_types = ['quickfix', 'help', 'nofile', 'terminal']
+	if winnr('$') > 1 && (index(functional_buf_types, &bt) >= 0)
+		let norm_wins = filter(range(1, winnr('$')),
+					\ 'index(functional_buf_types, getbufvar(winbufnr(v:val), "&bt")) == -1')
+		let norm_win = !empty(norm_wins) ? norm_wins[0] : 0
+		exe norm_win . 'winc w'
+	endif
+	exe a:cmd
 endfunc
 
 function! IsWSL()
@@ -189,7 +217,8 @@ set exrc
 set secure
 
 " Make Vim completion popup menu work just like in an IDE
-set completeopt=menu,menuone,popup
+" set completeopt=menu,menuone,popup
+set completeopt=menu,menuone
 
 " Vundle setup:
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -200,6 +229,7 @@ call vundle#begin()
     Plugin 'itchyny/vim-cursorword'
     Plugin 'roxma/vim-paste-easy'
     Plugin 'moll/vim-bbye'
+    Plugin 'jeetsukumaran/vim-buffergator'
     Plugin 'christoomey/vim-tmux-navigator'
     Plugin 'scrooloose/nerdtree'
     Plugin 'vim-airline/vim-airline'
@@ -207,22 +237,22 @@ call vundle#begin()
     Plugin 'bling/vim-bufferline'
     Plugin 'szw/vim-maximizer'
     Plugin 'bkad/CamelCaseMotion'
-    Plugin 'vim-scripts/AutoComplPop'
-    Plugin 'jiangmiao/auto-pairs'
+    Plugin 'ryanoasis/vim-devicons'
+    Plugin 'dense-analysis/ale'
+    " Plugin 'vim-scripts/AutoComplPop'
+    " Plugin 'jiangmiao/auto-pairs'
     " Git
     Plugin 'tpope/vim-fugitive'
     Plugin 'cohama/agit.vim'
+    Plugin 'junegunn/fzf'
+    Plugin 'mhinz/vim-grepper'
     " IDE like plugins
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.ide" || v:argv[-2] =~ ".vimrc.java"))
         Plugin 'elvisoliveira/vim-lotr'
         Plugin 'preservim/tagbar'
-        Plugin 'jeetsukumaran/vim-buffergator'
         Plugin 'Xuyuanp/nerdtree-git-plugin'
-        Plugin 'ryanoasis/vim-devicons'
-        Plugin 'airblade/vim-gitgutter'
+        " Plugin 'airblade/vim-gitgutter'
         Plugin 'breuckelen/vim-resize'
-        Plugin 'mhinz/vim-grepper'
-        Plugin 'junegunn/fzf'
     endif
     " Only on Java [Eclipse] projects
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.java"))
@@ -268,14 +298,24 @@ let g:NERDTreeShowHidden=1
 let g:NERDTreeChDirMode=2
 let g:NERDTreeNodeDelimiter="\u00a0"
 
+" Buffergator
+let g:buffergator_viewport_split_policy="R"
+let g:buffergator_show_full_directory_path=0
+let g:buffergator_autodismiss_on_select=0
+let g:buffergator_autoupdate=1
+let g:buffergator_show_full_directory_path="bufname"
+
 map <C-n> :NERDTreeToggle<CR>
 map <C-f> :NERDTreeFind<CR>
+map <C-Space> :call RightSidebarToggle()<CR>
 
 " Buffer Control
 map <C-k> :call BufferActions('next')<CR>
 map <C-j> :call BufferActions('previous')<CR>
 map <C-x> :call BufferActions('close')<CR>
 map <C-h> :call BufferActions('alternate')<CR>
+
+map <C-g> :ALEGoToDefinition<CR>
 
 " Vim Bufferline
 let g:bufferline_echo = 0
@@ -309,7 +349,7 @@ noremap <F7> :call FZFOpen(':FZF')<CR>
 noremap <F8> :call FZFOpen(':Grepper -query')<CR>
 
 " Open buffer on external editor
-noremap <F9> :silent exec "!(scite % &) > /dev/null"<CR>
+noremap <F9> :silent exec "!(subl % &) > /dev/null"<CR>
 
 " Toggle BOM
 noremap <F10> :set bomb!<CR>
@@ -322,6 +362,27 @@ noremap <F12> :call ToggleFileEncoding()<CR>
 
 " Airline Theme
 let g:airline_theme='luna'
+
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#tab_nr_type = 1 " tab number
+let g:airline#extensions#tabline#show_tab_nr = 1
+let g:airline#extensions#tabline#formatter = 'default'
+let g:airline#extensions#tabline#buffer_nr_show = 1
+let g:airline#extensions#tabline#fnametruncate = 0
+let g:airline#extensions#tabline#fnamecollapse = 2
+let g:airline#extensions#tabline#fnamemod = ':t'
+
+let g:airline_left_sep = ''
+let g:airline_right_sep = ''
+
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = ''
+let g:airline#extensions#tabline#right_sep = ' '
+let g:airline#extensions#tabline#right_alt_sep = ''
+
+let g:airline#extensions#tabline#buffer_idx_mode = 1
+
+let g:webdevicons_enable_airline_tabline = 0
 
 " Fix indenting visual block
 vmap < <gv
@@ -390,6 +451,8 @@ map <silent> w <Plug>CamelCaseMotion_w
 map <silent> b <Plug>CamelCaseMotion_b
 map <silent> e <Plug>CamelCaseMotion_e
 map <silent> ge <Plug>CamelCaseMotion_ge
+
+nnoremap <ESC> :nohlsearch<CR>
 
 sunmap w
 sunmap b
