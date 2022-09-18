@@ -84,10 +84,10 @@ let g:fzf_layout = { 'down': '40%' }
 
 let $FZF_DEFAULT_COMMAND = 'rg --files --hidden'
 
-map <C-@> :call RightSidebarToggle()<CR>
+" map <C-@> :call RightSidebarToggle()<CR>
 
 " Toggle right sidebar: BufferGator, TagBar, LOTR
-autocmd VimEnter * call RightSidebarToggle()
+" autocmd VimEnter * call RightSidebarToggle()
 
 " Resize panes on Vim window resize
 autocmd VimResized * if &equalalways | wincmd = | endif

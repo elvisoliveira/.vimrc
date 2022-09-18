@@ -17,12 +17,12 @@ function! IsWSL()
 endfunc
 
 function! GetSelectedText()
-	normal gv"xy
-	let reg = getreg("x")
-	let reg = substitute(reg, '\', '\\\\', 'g')
-	let reg = substitute(reg, '"', '\\"', 'g')
-	normal gv
-	return substitute(reg, '/', '\\/', 'g')
+    normal gv"xy
+    let reg = getreg("x")
+    let reg = substitute(reg, '\', '\\\\', 'g')
+    let reg = substitute(reg, '"', '\\"', 'g')
+    normal gv
+    return substitute(reg, '/', '\\/', 'g')
 endfunc
 
 function! SetXselClipboard()
@@ -120,8 +120,11 @@ endfunc
 set cursorline
 set cursorcolumn
 
-" Don't touch end of file
-set nofixendofline
+" Don't touch EOL of end of file
+set nofixeol
+
+" Remove EOL of end of file
+set noeol
 
 " Set bash as default shell.
 if !has('win32')
@@ -178,54 +181,57 @@ set clipboard=unnamedplus
 
 filetype off
 filetype plugin on
-filetype plugin indent on
 
 " Read .vimrc files of the file directory
 set exrc
 set secure
 
 " Make Vim completion popup menu work just like in an IDE
-set completeopt=menu,menuone,popup
+set completeopt=menu,menuone,noselect
 
-" Vundle setup:
-set rtp+=~/.vim/bundle/Vundle.vim
-
-call vundle#begin()
-    Plugin 'VundleVim/Vundle.vim'
-    Plugin 'godlygeek/tabular'
-    Plugin 'itchyny/vim-cursorword'
-    Plugin 'roxma/vim-paste-easy'
-    Plugin 'moll/vim-bbye'
-    Plugin 'christoomey/vim-tmux-navigator'
-    Plugin 'scrooloose/nerdtree'
-    Plugin 'vim-airline/vim-airline'
-    Plugin 'vim-airline/vim-airline-themes'
-    Plugin 'bling/vim-bufferline'
-    Plugin 'szw/vim-maximizer'
-    Plugin 'bkad/CamelCaseMotion'
-    Plugin 'vim-scripts/AutoComplPop'
-    Plugin 'jiangmiao/auto-pairs'
+call plug#begin('~/.vim/plugged')
+    Plug 'godlygeek/tabular'
+    Plug 'itchyny/vim-cursorword'
+    Plug 'roxma/vim-paste-easy'
+    Plug 'moll/vim-bbye'
+    Plug 'christoomey/vim-tmux-navigator'
+    Plug 'scrooloose/nerdtree'
+    Plug 'vim-airline/vim-airline'
+    Plug 'vim-airline/vim-airline-themes'
+    Plug 'bling/vim-bufferline'
+    Plug 'mg979/vim-visual-multi'
+    Plug 'hrsh7th/vim-vsnip'
+    " Plug 'wellle/context.vim'
+    Plug 'chaoren/vim-wordmotion'
+    Plug 'editorconfig/editorconfig-vim'
     " Git
-    Plugin 'tpope/vim-fugitive'
-    Plugin 'cohama/agit.vim'
+    Plug 'cohama/agit.vim'
+    " Neovim excl. plugins
+    if has('nvim')
+        Plug 'neovim/nvim-lspconfig'
+        Plug 'hrsh7th/nvim-compe'
+        Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+        Plug 'nvim-treesitter/nvim-treesitter-context'
+    endif
     " IDE like plugins
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.ide" || v:argv[-2] =~ ".vimrc.java"))
-        Plugin 'elvisoliveira/vim-lotr'
-        Plugin 'preservim/tagbar'
-        Plugin 'jeetsukumaran/vim-buffergator'
-        Plugin 'Xuyuanp/nerdtree-git-plugin'
-        Plugin 'ryanoasis/vim-devicons'
-        Plugin 'airblade/vim-gitgutter'
-        Plugin 'breuckelen/vim-resize'
-        Plugin 'mhinz/vim-grepper'
-        Plugin 'junegunn/fzf'
+        Plug 'elvisoliveira/vim-lotr'
+        Plug 'preservim/tagbar'
+        Plug 'jeetsukumaran/vim-buffergator'
+        Plug 'Xuyuanp/nerdtree-git-plugin'
+        Plug 'ryanoasis/vim-devicons'
+        Plug 'airblade/vim-gitgutter'
+        Plug 'breuckelen/vim-resize'
+        Plug 'mhinz/vim-grepper'
+        Plug 'junegunn/fzf'
+        Plug 'vim-syntastic/syntastic'
     endif
     " Only on Java [Eclipse] projects
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.java"))
-        Plugin 'puremourning/vimspector'
-        Plugin 'ycm-core/YouCompleteMe'
+        Plug 'puremourning/vimspector'
+        Plug 'ycm-core/YouCompleteMe'
     endif
-call vundle#end()
+call plug#end()
 
 " Always show statusline.
 set laststatus=2
@@ -268,10 +274,10 @@ map <C-n> :NERDTreeToggle<CR>
 map <C-f> :NERDTreeFind<CR>
 
 " Buffer Control
-map <C-k> :call BufferActions('next')<CR>
-map <C-j> :call BufferActions('previous')<CR>
-map <C-x> :call BufferActions('close')<CR>
-map <C-h> :call BufferActions('alternate')<CR>
+nnoremap <C-k> :call BufferActions('next')<CR>
+nnoremap <C-j> :call BufferActions('previous')<CR>
+nnoremap <C-x> :call BufferActions('close')<CR>
+nnoremap <C-h> :call BufferActions('alternate')<CR>
 
 " Vim Bufferline
 let g:bufferline_echo = 0
@@ -382,31 +388,239 @@ if !has("gui_running")
     hi Normal guibg=NONE ctermbg=NONE
 endif
 
-map <silent> w <Plug>CamelCaseMotion_w
-map <silent> b <Plug>CamelCaseMotion_b
-map <silent> e <Plug>CamelCaseMotion_e
-map <silent> ge <Plug>CamelCaseMotion_ge
+" supress the annoying 'match x of y', 'The only match' and 'Pattern not
+" found' messages
+set shortmess+=c
 
-sunmap w
-sunmap b
-sunmap e
-sunmap ge
+" A smaller timeout for quicker refresh rate
+set timeoutlen=100
+
+nnoremap <Tab> :
+
+nnoremap <A-h> <cmd>lua vim.diagnostic.goto_prev({float=false})<CR>
+nnoremap <A-l> <cmd>lua vim.diagnostic.goto_next({float=false})<CR>
+
+noremap <A-j> <C-e>
+noremap <A-k> <C-y>
+
+" errors, warnings, info
+hi! Error   guibg=#ff3600 guifg=#bc6ec5 ctermbg=7 ctermfg=196 gui=bold cterm=bold
+hi! Warning guibg=#ff761a guifg=#bc6ec5 ctermbg=7 ctermfg=226 gui=bold cterm=bold
+hi! Info    guibg=#b4b4b9 guifg=#839496 ctermbg=7 ctermfg=202 gui=bold cterm=bold
+
+hi! link ErrorMsg Error
+hi! link WarningMsg Warning
+hi! link InfoMsg Info
+
+" LSP highlights
+hi! link LspDiagnosticsDefaultError Error
+hi! link LspDiagnosticsDefaultWarning Warning
+hi! link LspDiagnosticsDefaultHint Info
+hi! link LspDiagnosticsDefaultInformation Info
+hi! link LspDiagnosticsDefaultInfo Info
+
+hi! link LspDiagnosticsErrorSign Error
+hi! link LspDiagnosticsHintSign Info
+hi! link LspDiagnosticsInformationSign Info
+hi! link LspDiagnosticsWarningSign Warning
+
+hi! link LspDiagnosticsUnderlineError Error
+hi! link LspDiagnosticsUnderlineWarning Warning
+hi! link LspDiagnosticsUnderlineHint Info
+hi! link LspDiagnosticsUnderlineInformation Info
+hi! link LspDiagnosticsUnderlineInfo Info
+
+hi! link LspDiagnosticsVirtualTextError Error
+hi! link LspDiagnosticsVirtualTextWarning Warning
+hi! link LspDiagnosticsVirtualTextHint Info
+hi! link LspDiagnosticsVirtualTextInformation Info
+hi! link LspDiagnosticsVirtualTextInfo Info
+
+hi! link LspDiagnosticsFloatingError Error
+hi! link LspDiagnosticsFloatingWarning Warning
+hi! link LspDiagnosticsFloatingHint Info
+hi! link LspDiagnosticsFloatingInformation Info
+hi! link LspDiagnosticsFloatingInfo Info
+
+hi! link LspDiagnosticsSignError Error
+hi! link LspDiagnosticsSignWarning Warning
+hi! link LspDiagnosticsSignHint Info
+hi! link LspDiagnosticsSignInformation Info
+hi! link LspDiagnosticsSignInfo Info
+
+hi! link DiagnosticError Error
+hi! link DiagnosticWarn Warning
+hi! link DiagnosticInfo Info
+hi! link DiagnosticHint Info
+
+hi! link DiagnosticSignError Error
+hi! link DiagnosticSignWarning Warning
+hi! link DiagnosticSignInformation Info
+hi! link DiagnosticSignInfo Info
+hi! link DiagnosticSignHint Info
+
+hi! link LspDiagnosticsError Error
+hi! link LspDiagnosticsWarning Warning
+hi! link LspDiagnosticsInformation Info
+hi! link LspDiagnosticsInfo Info
+hi! link LspDiagnosticsHint Info
+
+" hi! link LspReferenceRead Error
+" hi! link LspReferenceText Warning
+" hi! link LspReferenceWrite Info
+
+hi! link DiagnosticFloatingError Error
+hi! link DiagnosticFloatingWarn Warning
+hi! link DiagnosticFloatingInfo Info
+hi! link DiagnosticFloatingHint Info
+
+hi! link DiagnosticUnderlineError Error
+hi! link DiagnosticUnderlineWarn Warning
+hi! link DiagnosticUnderlineInfo Info
+hi! link DiagnosticUnderlineHint Info
+
+hi! link DiagnosticVirtualTextError Error
+hi! link DiagnosticVirtualTextWarn Warning
+hi! link DiagnosticVirtualTextInfo Info
+hi! link DiagnosticVirtualTextHint Info
+
+" hi! link Pmenu guibg=#140100 guifg=#660300 gui=none
+" hi! link PmenuSbar guibg=#430300 gui=none
+" hi! link PmenuThumb guibg=#720300 gui=none
+" hi! link PmenuSel guibg=#F17A00 guifg=#4C0200 gui=none
 
 "" Omni Completion
-autocmd FileType python set omnifunc=pythoncomplete#Complete
-autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
-autocmd FileType css set omnifunc=csscomplete#CompleteCSS
-autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
-autocmd FileType php set omnifunc=phpcomplete#CompletePHP
-autocmd FileType c set omnifunc=ccomplete#Complete
+" autocmd   FileType   c            set   omnifunc=ccomplete#Complete
+" autocmd   FileType   css          set   omnifunc=csscomplete#CompleteCSS
+" autocmd   FileType   html         set   omnifunc=htmlcomplete#CompleteTags
+" autocmd   FileType   javascript   set   omnifunc=javascriptcomplete#CompleteJS
+" autocmd   FileType   php          set   omnifunc=phpcomplete#CompletePHP
+" autocmd   FileType   python       set   omnifunc=pythoncomplete#Complete
+" autocmd   FileType   xml          set   omnifunc=xmlcomplete#CompleteTags
 
-inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+if !has('nvim')
+    inoremap <expr> <C-@> <c-x><c-o>
+    inoremap <expr> <CR>  pumvisible() ? "\<C-y>" : "\<CR>"
+    " inoremap <expr> <C-l> pumvisible() ? "\<C-y>" : "\<C-l>"
+    inoremap <expr> <Esc> pumvisible() ? (complete_info().selected == -1 ? "\<Esc>" : "\<C-e>") : "<Esc>"
+    inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
+    inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
+else
+    inoremap <expr> <CR>      compe#confirm('<CR>')
+    inoremap <expr> <C-Space> compe#complete()
 
-if has("unix")
-    inoremap <C-@> <c-x><c-o>
-elseif has("win32")
-    inoremap <C-Space> <c-x><c-o>
+    inoremap <expr> <Esc> pumvisible() ? (complete_info().selected == -1 ? "\<Esc>" : compe#close('<C-e>')) : "<Esc>"
+    inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
+    inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
 endif
+
+nnoremap <Esc> :noh<Return><Esc>
+
+let g:VM_maps = {}
+let g:VM_maps['Find Under'] = ''
+
+lua <<EOF
+if vim.fn.has('nvim') == 1 then
+    require'compe'.setup{
+        enabled = true;
+        autocomplete = true;
+        debug = false;
+        min_length = 1;
+        preselect = 'enable';
+        throttle_time = 80;
+        source_timeout = 200;
+        resolve_timeout = 800;
+        incomplete_delay = 400;
+        max_abbr_width = 100;
+        max_kind_width = 100;
+        max_menu_width = 100;
+        documentation = {
+            border = { '', '' ,'', ' ', '', '', '', ' ' }, -- the border option is the same as `|help nvim_open_win|`
+            winhighlight = "NormalFloat:CompeDocumentation,FloatBorder:CompeDocumentationBorder",
+            max_width = 120,
+            min_width = 60,
+            max_height = math.floor(vim.o.lines * 0.3),
+            min_height = 1,
+        };
+        source = {
+            path = true;
+            spell = true;
+            tag = true;
+            buffer = true;
+            calc = true;
+            nvim_lsp = true;
+            nvim_lua = true;
+            vsnip = true;
+            ultisnips = true;
+            luasnip = true;
+            emoji = true;
+        };
+    }
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    capabilities.textDocument.completion.completionItem.snippetSupport = true
+    capabilities.textDocument.completion.completionItem.resolveSupport = {
+        properties = {
+            'documentation',
+            'detail',
+            'additionalTextEdits'
+        }
+    }
+    require'lspconfig'.phpactor.setup {
+        capabilities = capabilities
+    }
+    require'lspconfig'.eslint.setup {
+        capabilities = capabilities
+    }
+    require'lspconfig'.tsserver.setup{
+        capabilities = capabilities
+    }
+    require'nvim-treesitter.configs'.setup {
+        ensure_installed = { "vim", "python", "php", "javascript", "lua" },
+        sync_install = false,
+        highlight = {
+            enable = true,
+            disable = {},
+            additional_vim_regex_highlighting = false
+        }
+    }
+    --[[
+    -- ]]
+    require'treesitter-context'.setup{
+        enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+        max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+        patterns = { -- Match patterns for TS nodes. These get wrapped to match at word boundaries.
+            -- For all filetypes
+            -- Note that setting an entry here replaces all other patterns for this entry.
+            -- By setting the 'default' entry below, you can control which nodes you want to
+            -- appear in the context window.
+            default = {
+                'class',
+                'function',
+                'foreach',
+                'method',
+                -- 'for', -- These won't appear in the context
+                'while',
+                'if',
+                'switch',
+                'case',
+            },
+            -- Example for a specific filetype.
+            -- If a pattern is missing, *open a PR* so everyone can benefit.
+            --   rust = {
+            --       'impl_item',
+            --   },
+        },
+        exact_patterns = {
+            -- Example for a specific filetype with Lua patterns
+            -- Treat patterns.rust as a Lua pattern (i.e "^impl_item$" will
+            -- exactly match "impl_item" only)
+            -- rust = true,
+        },
+
+        -- [!] The options below are exposed but shouldn't require your attention,
+        --     you can safely ignore them.
+
+        zindex = 20, -- The Z-index of the context window
+    }
+end
+EOF
