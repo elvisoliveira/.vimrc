@@ -14,11 +14,7 @@ function! RightSidebarToggle()
 endfunc
 
 function! AirlineInit()
-    " let g:airline_section_a = airline#section#create(['file'])
-    " let g:airline_section_b = airline#section#create([])
     let g:airline_section_c = airline#section#create(['%f'])
-    " let g:airline_section_x = airline#section#create(['mode'])
-    " let g:airline_extensions = []
 endfunc
 
 " See: https://github.com/junegunn/fzf/issues/453
@@ -237,21 +233,22 @@ call vundle#begin()
     Plugin 'bling/vim-bufferline'
     Plugin 'szw/vim-maximizer'
     Plugin 'bkad/CamelCaseMotion'
-    Plugin 'ryanoasis/vim-devicons'
     Plugin 'dense-analysis/ale'
     " Plugin 'vim-scripts/AutoComplPop'
     " Plugin 'jiangmiao/auto-pairs'
     " Git
     Plugin 'tpope/vim-fugitive'
     Plugin 'cohama/agit.vim'
+    Plugin 'Xuyuanp/nerdtree-git-plugin'
+    Plugin 'airblade/vim-gitgutter'
     Plugin 'junegunn/fzf'
     Plugin 'mhinz/vim-grepper'
+    Plugin 'ryanoasis/vim-devicons'
+    Plugin 'nvim-treesitter/nvim-treesitter'
     " IDE like plugins
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.ide" || v:argv[-2] =~ ".vimrc.java"))
         Plugin 'elvisoliveira/vim-lotr'
         Plugin 'preservim/tagbar'
-        Plugin 'Xuyuanp/nerdtree-git-plugin'
-        " Plugin 'airblade/vim-gitgutter'
         Plugin 'breuckelen/vim-resize'
     endif
     " Only on Java [Eclipse] projects
@@ -307,13 +304,17 @@ let g:buffergator_show_full_directory_path="bufname"
 
 map <C-n> :NERDTreeToggle<CR>
 map <C-f> :NERDTreeFind<CR>
-map <C-Space> :call RightSidebarToggle()<CR>
+if has("unix")
+    nnoremap <C-Space> :call RightSidebarToggle()<CR>
+elseif has("win32")
+    nnoremap <C-@> :call RightSidebarToggle()<CR>
+endif
 
 " Buffer Control
-map <C-k> :call BufferActions('next')<CR>
-map <C-j> :call BufferActions('previous')<CR>
-map <C-x> :call BufferActions('close')<CR>
-map <C-h> :call BufferActions('alternate')<CR>
+nnoremap <C-k> :call BufferActions('next')<CR>
+nnoremap <C-j> :call BufferActions('previous')<CR>
+nnoremap <C-x> :call BufferActions('close')<CR>
+nnoremap <C-h> :call BufferActions('alternate')<CR>
 
 map <C-g> :ALEGoToDefinition<CR>
 
@@ -360,6 +361,12 @@ noremap <F11> :call ToggleFileformat()<CR>
 " Toggle File Encode
 noremap <F12> :call ToggleFileEncoding()<CR>
 
+let g:ale_linters = { 'php': ['php', 'psalm', 'cspell'], 'vue': ['vue', 'eslint', 'vls', 'jshint', 'jscs', 'cspell', 'standard'] }
+let g:ale_open_list = 0
+let g:ale_keep_list_window_open = 0
+let g:ale_lint_on_save = 0
+let g:ale_completion_enabled = 1
+
 " Airline Theme
 let g:airline_theme='luna'
 
@@ -371,6 +378,8 @@ let g:airline#extensions#tabline#buffer_nr_show = 1
 let g:airline#extensions#tabline#fnametruncate = 0
 let g:airline#extensions#tabline#fnamecollapse = 2
 let g:airline#extensions#tabline#fnamemod = ':t'
+
+let g:airline#extensions#ale#enabled = 1
 
 let g:airline_left_sep = ''
 let g:airline_right_sep = ''
@@ -465,15 +474,31 @@ autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
 autocmd FileType css set omnifunc=csscomplete#CompleteCSS
 autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
-autocmd FileType php set omnifunc=phpcomplete#CompletePHP
+autocmd FileType php set omnifunc=ale#completion#OmniFunc
 autocmd FileType c set omnifunc=ccomplete#Complete
 
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
+inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
+
 if has("unix")
-    inoremap <C-@> <c-x><c-o>
-elseif has("win32")
     inoremap <C-Space> <c-x><c-o>
+elseif has("win32")
+    inoremap <C-@> <c-x><c-o>
 endif
+
+lua <<EOF
+require'nvim-treesitter.configs'.setup {
+    ensure_installed = {"javascript", "html", "css", "php", "vim", "vue", "json"},
+    sync_install = false,
+    ignore_install = {},
+    highlight = {
+        enable = true,
+        disable = {}
+    }
+}
+EOF
