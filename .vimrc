@@ -1,16 +1,16 @@
 " Author: Elvis Oliveira - http://github.com/elvisoliveira "
 let s:enabled = 0
 function! RightSidebarToggle()
-	let b = bufnr("%")
-	if s:enabled
-		let s:enabled = 0
-		execute "BuffergatorClose"
-	else
-		let s:enabled = 1
-		execute "BuffergatorOpen"
-	endif
-	execute (bufwinnr(b) . "wincmd w")
-	wincmd =
+    let b = bufnr("%")
+    if s:enabled
+        let s:enabled = 0
+        execute "BuffergatorClose"
+    else
+        let s:enabled = 1
+        execute "BuffergatorOpen"
+    endif
+    execute (bufwinnr(b) . "wincmd w")
+    wincmd =
 endfunc
 
 function! AirlineInit()
@@ -19,14 +19,14 @@ endfunc
 
 " See: https://github.com/junegunn/fzf/issues/453
 function! FZFOpen(cmd)
-	let functional_buf_types = ['quickfix', 'help', 'nofile', 'terminal']
-	if winnr('$') > 1 && (index(functional_buf_types, &bt) >= 0)
-		let norm_wins = filter(range(1, winnr('$')),
-					\ 'index(functional_buf_types, getbufvar(winbufnr(v:val), "&bt")) == -1')
-		let norm_win = !empty(norm_wins) ? norm_wins[0] : 0
-		exe norm_win . 'winc w'
-	endif
-	exe a:cmd
+    let functional_buf_types = ['quickfix', 'help', 'nofile', 'terminal']
+    if winnr('$') > 1 && (index(functional_buf_types, &bt) >= 0)
+        let norm_wins = filter(range(1, winnr('$')),
+                    \ 'index(functional_buf_types, getbufvar(winbufnr(v:val), "&bt")) == -1')
+        let norm_win = !empty(norm_wins) ? norm_wins[0] : 0
+        exe norm_win . 'winc w'
+    endif
+    exe a:cmd
 endfunc
 
 function! IsWSL()
@@ -41,12 +41,12 @@ function! IsWSL()
 endfunc
 
 function! GetSelectedText()
-	normal gv"xy
-	let reg = getreg("x")
-	let reg = substitute(reg, '\', '\\\\', 'g')
-	let reg = substitute(reg, '"', '\\"', 'g')
-	normal gv
-	return substitute(reg, '/', '\\/', 'g')
+    normal gv"xy
+    let reg = getreg("x")
+    let reg = substitute(reg, '\', '\\\\', 'g')
+    let reg = substitute(reg, '"', '\\"', 'g')
+    normal gv
+    return substitute(reg, '/', '\\/', 'g')
 endfunc
 
 function! SetXselClipboard()
@@ -144,8 +144,11 @@ endfunc
 set cursorline
 set cursorcolumn
 
-" Don't touch end of file
-set nofixendofline
+" Don't touch EOL of end of file
+set nofixeol
+
+" Remove EOL of end of file
+set noeol
 
 " Set bash as default shell.
 if !has('win32')
@@ -213,48 +216,51 @@ set exrc
 set secure
 
 " Make Vim completion popup menu work just like in an IDE
-" set completeopt=menu,menuone,popup
-set completeopt=menu,menuone
+set completeopt=menu,menuone,noselect
 
-" Vundle setup:
-set rtp+=~/.vim/bundle/Vundle.vim
-
-call vundle#begin()
-    Plugin 'VundleVim/Vundle.vim'
-    Plugin 'godlygeek/tabular'
-    Plugin 'itchyny/vim-cursorword'
-    Plugin 'roxma/vim-paste-easy'
-    Plugin 'moll/vim-bbye'
-    Plugin 'jeetsukumaran/vim-buffergator'
-    Plugin 'christoomey/vim-tmux-navigator'
-    Plugin 'scrooloose/nerdtree'
-    Plugin 'vim-airline/vim-airline'
-    Plugin 'vim-airline/vim-airline-themes'
-    Plugin 'bling/vim-bufferline'
-    Plugin 'szw/vim-maximizer'
-    Plugin 'bkad/CamelCaseMotion'
-    Plugin 'dense-analysis/ale'
-    " Plugin 'vim-scripts/AutoComplPop'
-    " Plugin 'jiangmiao/auto-pairs'
+" Plugins
+call plug#begin('~/.vim/plugged')
+    Plug 'VundleVim/Vundle.vim'
+    Plug 'godlygeek/tabular'
+    Plug 'itchyny/vim-cursorword'
+    Plug 'roxma/vim-paste-easy'
+    Plug 'moll/vim-bbye'
+    Plug 'jeetsukumaran/vim-buffergator'
+    Plug 'christoomey/vim-tmux-navigator'
+    Plug 'scrooloose/nerdtree'
+    Plug 'ryanoasis/vim-devicons' " Must load after Nerdtree
+    Plug 'vim-airline/vim-airline'
+    Plug 'vim-airline/vim-airline-themes'
+    Plug 'bling/vim-bufferline'
+    Plug 'dense-analysis/ale'
+    Plug 'junegunn/fzf'
+    Plug 'mhinz/vim-grepper'
+    Plug 'mg979/vim-visual-multi'
+    Plug 'hrsh7th/vim-vsnip'
+    Plug 'chaoren/vim-wordmotion'
+    Plug 'editorconfig/editorconfig-vim'
     " Git
-    Plugin 'tpope/vim-fugitive'
-    Plugin 'cohama/agit.vim'
-    Plugin 'Xuyuanp/nerdtree-git-plugin'
-    Plugin 'airblade/vim-gitgutter'
-    Plugin 'junegunn/fzf'
-    Plugin 'mhinz/vim-grepper'
-    Plugin 'ryanoasis/vim-devicons'
-    Plugin 'nvim-treesitter/nvim-treesitter'
+    Plug 'tpope/vim-fugitive'
+    Plug 'cohama/agit.vim'
+    Plug 'Xuyuanp/nerdtree-git-plugin'
+    Plug 'airblade/vim-gitgutter'
+    " Neovim excl. plugins
+    if has('nvim')
+        Plug 'neovim/nvim-lspconfig'
+        Plug 'hrsh7th/nvim-compe'
+        Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+        Plug 'nvim-treesitter/nvim-treesitter-context'
+    endif
     " IDE like plugins
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.ide" || v:argv[-2] =~ ".vimrc.java"))
-        Plugin 'elvisoliveira/vim-lotr'
-        Plugin 'preservim/tagbar'
-        Plugin 'breuckelen/vim-resize'
+        Plug 'elvisoliveira/vim-lotr'
+        Plug 'preservim/tagbar'
+        Plug 'breuckelen/vim-resize'
     endif
     " Only on Java [Eclipse] projects
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.java"))
-        Plugin 'puremourning/vimspector'
-        Plugin 'ycm-core/YouCompleteMe'
+        Plug 'puremourning/vimspector'
+        Plug 'ycm-core/YouCompleteMe'
     endif
 call vundle#end()
 
@@ -446,7 +452,7 @@ autocmd BufEnter * if bufname("#") =~ "NERD_tree_\d\+" && bufname("%") !~ "NERD_
 " NERDTree Relative Numbers
 autocmd FileType nerdtree setlocal relativenumber
 
-" Open QUickfix itens with 'o' key
+" Open Quickfix itens with 'o' key
 autocmd BufReadPost quickfix noremap <silent> <buffer> o <CR>
 
 " AirLine
@@ -455,11 +461,6 @@ autocmd User AirlineAfterInit call AirlineInit()
 if !has("gui_running")
     hi Normal guibg=NONE ctermbg=NONE
 endif
-
-map <silent> w <Plug>CamelCaseMotion_w
-map <silent> b <Plug>CamelCaseMotion_b
-map <silent> e <Plug>CamelCaseMotion_e
-map <silent> ge <Plug>CamelCaseMotion_ge
 
 nnoremap <ESC> :nohlsearch<CR>
 
@@ -491,14 +492,56 @@ elseif has("win32")
     inoremap <C-@> <c-x><c-o>
 endif
 
+" vim-visual-multi
+let g:VM_maps = {}
+let g:VM_maps['Find Under'] = ''
+
 lua <<EOF
-require'nvim-treesitter.configs'.setup {
-    ensure_installed = {"javascript", "html", "css", "php", "vim", "vue", "json"},
-    sync_install = false,
-    ignore_install = {},
-    highlight = {
-        enable = true,
-        disable = {}
+if vim.fn.has('nvim') == 1 then
+    require'nvim-treesitter.configs'.setup {
+        ensure_installed = {"javascript", "html", "css", "php", "vim", "vue", "json", "python", "lua"},
+        sync_install = false,
+        ignore_install = {},
+        highlight = {
+            enable = true,
+            disable = {},
+            additional_vim_regex_highlighting = false
+        }
     }
-}
+    require'treesitter-context'.setup{
+        enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+        max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+        patterns = { -- Match patterns for TS nodes. These get wrapped to match at word boundaries.
+            -- For all filetypes
+            -- Note that setting an entry here replaces all other patterns for this entry.
+            -- By setting the 'default' entry below, you can control which nodes you want to
+            -- appear in the context window.
+            default = {
+                'class',
+                'function',
+                'foreach',
+                'method',
+                -- 'for', -- These won't appear in the context
+                'while',
+                'if',
+                'switch',
+                'case',
+            },
+            -- Example for a specific filetype.
+            -- If a pattern is missing, *open a PR* so everyone can benefit.
+            --   rust = {
+            --       'impl_item',
+            --   },
+        },
+        exact_patterns = {
+            -- Example for a specific filetype with Lua patterns
+            -- Treat patterns.rust as a Lua pattern (i.e "^impl_item$" will
+            -- exactly match "impl_item" only)
+            -- rust = true,
+        },
+        -- [!] The options below are exposed but shouldn't require your attention,
+        --     you can safely ignore them.
+        zindex = 20, -- The Z-index of the context window
+    }
+end
 EOF
