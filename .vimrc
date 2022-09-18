@@ -262,7 +262,7 @@ call plug#begin('~/.vim/plugged')
         Plug 'puremourning/vimspector'
         Plug 'ycm-core/YouCompleteMe'
     endif
-call vundle#end()
+call plug#end()
 
 " Always show statusline.
 set laststatus=2
