@@ -69,7 +69,9 @@ endfunc
 
 function! ToggleMouse()
     let &mouse = (&mouse == 'a') ? '' : 'a'
-    let &ttymouse = (&ttymouse == 'sgr') ? '' : 'sgr'
+    if (has('ttymouse'))
+        let &ttymouse = (&ttymouse == 'sgr') ? '' : 'sgr'
+    endif
 endfunc
 
 function! ToggleFileformat()
@@ -143,6 +145,8 @@ endfunc
 " add line on cursor
 set cursorline
 set cursorcolumn
+
+set autoindent
 
 " Don't touch EOL of end of file
 set nofixeol
@@ -220,49 +224,71 @@ set completeopt=menu,menuone,noselect
 
 " Plugins
 call plug#begin('~/.vim/plugged')
-    Plug 'VundleVim/Vundle.vim'
     Plug 'godlygeek/tabular'
     Plug 'itchyny/vim-cursorword'
     Plug 'roxma/vim-paste-easy'
     Plug 'moll/vim-bbye'
-    Plug 'jeetsukumaran/vim-buffergator'
     Plug 'christoomey/vim-tmux-navigator'
-    Plug 'scrooloose/nerdtree'
-    Plug 'ryanoasis/vim-devicons' " Must load after Nerdtree
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
-    Plug 'bling/vim-bufferline'
-    Plug 'dense-analysis/ale'
-    Plug 'junegunn/fzf'
-    Plug 'mhinz/vim-grepper'
     Plug 'mg979/vim-visual-multi'
-    Plug 'hrsh7th/vim-vsnip'
     Plug 'chaoren/vim-wordmotion'
     Plug 'editorconfig/editorconfig-vim'
+
+    Plug 'dense-analysis/ale'
+    Plug 'hrsh7th/vim-vsnip'
+
     " Git
     Plug 'tpope/vim-fugitive'
-    Plug 'cohama/agit.vim'
+    Plug 'rhysd/git-messenger.vim'
+
+    " Plug 'airblade/vim-gitgutter'
+    Plug 'lewis6991/gitsigns.nvim'
+
+    " Sidebar
+    Plug 'scrooloose/nerdtree'
     Plug 'Xuyuanp/nerdtree-git-plugin'
-    Plug 'airblade/vim-gitgutter'
+    Plug 'ryanoasis/vim-devicons' " Must load after Nerdtree
+
     " Neovim excl. plugins
     if has('nvim')
         Plug 'neovim/nvim-lspconfig'
-        Plug 'hrsh7th/nvim-compe'
         Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
         Plug 'nvim-treesitter/nvim-treesitter-context'
+        Plug 'nvim-lua/plenary.nvim' " telescope requirement
+        Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.x' }
+        Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+    else
+        Plug 'jeetsukumaran/vim-buffergator'
+        Plug 'junegunn/fzf'
+        Plug 'mhinz/vim-grepper'
+        Plug 'Shougo/deoplete.nvim'
+        Plug 'roxma/nvim-yarp'
+        Plug 'roxma/vim-hug-neovim-rpc'
     endif
+
     " IDE like plugins
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.ide" || v:argv[-2] =~ ".vimrc.java"))
         Plug 'elvisoliveira/vim-lotr'
         Plug 'preservim/tagbar'
         Plug 'breuckelen/vim-resize'
     endif
+
     " Only on Java [Eclipse] projects
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.java"))
         Plug 'puremourning/vimspector'
         Plug 'ycm-core/YouCompleteMe'
     endif
 call plug#end()
+
+" Autocomplete
+let g:deoplete#enable_at_startup = 1
+
+call deoplete#custom#source('_', 'matchers', ['matcher_fuzzy', 'matcher_length'])
+call deoplete#custom#option({
+\ 'auto_complete_delay': 0,
+\ 'sources': { 'php': ['ale', 'omni', 'buffer'], '_': ['buffer'] }
+\ })
 
 " Always show statusline.
 set laststatus=2
@@ -310,11 +336,6 @@ let g:buffergator_show_full_directory_path="bufname"
 
 map <C-n> :NERDTreeToggle<CR>
 map <C-f> :NERDTreeFind<CR>
-if has("unix")
-    nnoremap <C-Space> :call RightSidebarToggle()<CR>
-elseif has("win32")
-    nnoremap <C-@> :call RightSidebarToggle()<CR>
-endif
 
 " Buffer Control
 nnoremap <C-k> :call BufferActions('next')<CR>
@@ -350,10 +371,24 @@ noremap <F5> :g/\v(^\s\t*$)/d<CR>
 noremap <F6> :%s/\v(\s+$\|\t+$)//g<CR>
 
 " Fuzzyfinder
-noremap <F7> :call FZFOpen(':FZF')<CR>
-
 " GREP
-noremap <F8> :call FZFOpen(':Grepper -query')<CR>
+if has('nvim')
+    noremap <F7> <CMD>Telescope find_files<CR>
+    noremap <F8> <CMD>Telescope live_grep<CR>
+    if has("unix")
+        nnoremap <C-Space> <CMD>Telescope buffers<CR>
+    elseif has("win32")
+        nnoremap <C-@> <CMD>Telescope buffers<CR>
+    endif
+else
+    noremap <F7> :call FZFOpen(':FZF')<CR>
+    noremap <F8> :call FZFOpen(':Grepper -query')<CR>
+    if has("unix")
+        nnoremap <C-Space> :call RightSidebarToggle()<CR>
+    elseif has("win32")
+        nnoremap <C-@> :call RightSidebarToggle()<CR>
+    endif
+endif
 
 " Open buffer on external editor
 noremap <F9> :silent exec "!(subl % &) > /dev/null"<CR>
@@ -368,10 +403,15 @@ noremap <F11> :call ToggleFileformat()<CR>
 noremap <F12> :call ToggleFileEncoding()<CR>
 
 let g:ale_linters = { 'php': ['php', 'psalm', 'cspell'], 'vue': ['vue', 'eslint', 'vls', 'jshint', 'jscs', 'cspell', 'standard'] }
+let g:ale_linters_explicit = 1
+let g:ale_lint_on_save = 0
+let g:ale_lint_on_insert_leave = 1
 let g:ale_open_list = 0
 let g:ale_keep_list_window_open = 0
-let g:ale_lint_on_save = 0
-let g:ale_completion_enabled = 1
+let g:ale_completion_enabled = 0
+
+let g:airline_left_sep = ''
+let g:airline_right_sep = ''
 
 " Airline Theme
 let g:airline_theme='luna'
@@ -386,9 +426,6 @@ let g:airline#extensions#tabline#fnamecollapse = 2
 let g:airline#extensions#tabline#fnamemod = ':t'
 
 let g:airline#extensions#ale#enabled = 1
-
-let g:airline_left_sep = ''
-let g:airline_right_sep = ''
 
 let g:airline#extensions#tabline#left_sep = ' '
 let g:airline#extensions#tabline#left_alt_sep = ''
@@ -447,7 +484,7 @@ autocmd BufEnter * if winnr("$") == 1 &&
 
 " If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.
 autocmd BufEnter * if bufname("#") =~ "NERD_tree_\d\+" && bufname("%") !~ "NERD_tree_\d\+" && winnr("$") > 1 |
-	\ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute "buffer".buf | endif
+    \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute "buffer".buf | endif
 
 " NERDTree Relative Numbers
 autocmd FileType nerdtree setlocal relativenumber
@@ -464,19 +501,16 @@ endif
 
 nnoremap <ESC> :nohlsearch<CR>
 
-sunmap w
-sunmap b
-sunmap e
-sunmap ge
-
 "" Omni Completion
-autocmd FileType python set omnifunc=pythoncomplete#Complete
-autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
-autocmd FileType css set omnifunc=csscomplete#CompleteCSS
-autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
-autocmd FileType php set omnifunc=ale#completion#OmniFunc
-autocmd FileType c set omnifunc=ccomplete#Complete
+" autocmd   FileType   python       set   omnifunc=pythoncomplete#Complete
+" autocmd   FileType   javascript   set   omnifunc=javascriptcomplete#CompleteJS
+" autocmd   FileType   html         set   omnifunc=htmlcomplete#CompleteTags
+" autocmd   FileType   css          set   omnifunc=csscomplete#CompleteCSS
+" autocmd   FileType   xml          set   omnifunc=xmlcomplete#CompleteTags
+" autocmd   FileType   php          set   omnifunc=ale#completion#OmniFunc
+" autocmd   FileType   c            set   omnifunc=ccomplete#Complete
+
+autocmd FileType * setlocal autoindent
 
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
@@ -487,7 +521,7 @@ inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
 
 if has("unix")
-    inoremap <C-Space> <c-x><c-o>
+    inoremap <silent><expr> <C-Space> match(&runtimepath, 'deoplete') != -1 ? deoplete#complete() : "\<c-x><c-o>"
 elseif has("win32")
     inoremap <C-@> <c-x><c-o>
 endif
@@ -508,40 +542,42 @@ if vim.fn.has('nvim') == 1 then
             additional_vim_regex_highlighting = false
         }
     }
+
     require'treesitter-context'.setup{
-        enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-        max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
-        patterns = { -- Match patterns for TS nodes. These get wrapped to match at word boundaries.
-            -- For all filetypes
-            -- Note that setting an entry here replaces all other patterns for this entry.
-            -- By setting the 'default' entry below, you can control which nodes you want to
-            -- appear in the context window.
-            default = {
-                'class',
-                'function',
-                'foreach',
-                'method',
-                -- 'for', -- These won't appear in the context
-                'while',
-                'if',
-                'switch',
-                'case',
-            },
-            -- Example for a specific filetype.
-            -- If a pattern is missing, *open a PR* so everyone can benefit.
-            --   rust = {
-            --       'impl_item',
-            --   },
+        enable = true,
+        max_lines = 0,
+        patterns = {
+            -- default = {'class', 'function', 'foreach', 'method', 'while', 'if', 'switch', 'case' }
         },
-        exact_patterns = {
-            -- Example for a specific filetype with Lua patterns
-            -- Treat patterns.rust as a Lua pattern (i.e "^impl_item$" will
-            -- exactly match "impl_item" only)
-            -- rust = true,
-        },
-        -- [!] The options below are exposed but shouldn't require your attention,
-        --     you can safely ignore them.
-        zindex = 20, -- The Z-index of the context window
+        zindex = 20,
+        mode = 'topline'
     }
+
+    require('gitsigns').setup {
+      signcolumn = true,
+      numhl = false,
+      linehl = false,
+      word_diff = true,
+      current_line_blame = true,
+      current_line_blame_opts = {
+        virt_text = true,
+        virt_text_pos = 'eol',
+        delay = 0,
+        ignore_whitespace = false,
+      },
+      current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>'
+    }
+
+    require'lspconfig'.phpactor.setup{}
+    require'lspconfig'.psalm.setup{
+        cmd = {"psalm", "--language-server"}
+    }
+    require'lspconfig'.eslint.setup {}
+    require'lspconfig'.tsserver.setup{}
+
+    -- Disable LSP inline messages
+    vim.diagnostic.config({
+        virtual_text = false
+    })
 end
 EOF
