@@ -179,7 +179,7 @@ syntax enable
 " colorscheme desert
 " cd ~/.vim/colors
 " curl -o molokai.vim https://raw.githubusercontent.com/tomasr/molokai/master/colors/molokai.vim
-colorscheme molokai
+" colorscheme molokai
 
 let g:rehash256 = 1
 
@@ -223,7 +223,8 @@ set secure
 set completeopt=menu,menuone,noselect
 
 " Plugins
-call plug#begin('~/.vim/plugged')
+" call plug#begin('~/.vim/plugged')
+call plug#begin()
     Plug 'godlygeek/tabular'
     Plug 'itchyny/vim-cursorword'
     Plug 'roxma/vim-paste-easy'
@@ -244,6 +245,8 @@ call plug#begin('~/.vim/plugged')
 
     " Plug 'airblade/vim-gitgutter'
     Plug 'lewis6991/gitsigns.nvim'
+
+    Plug 'dracula/vim', { 'as': 'dracula' }
 
     " Sidebar
     Plug 'scrooloose/nerdtree'
