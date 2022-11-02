@@ -17,12 +17,12 @@ function! AirlineInit()
     let g:airline_section_c = airline#section#create(['%f'])
 endfunc
 
+let s:functional_buf_types = ['quickfix', 'help', 'nofile', 'terminal']
+
 " See: https://github.com/junegunn/fzf/issues/453
 function! FZFOpen(cmd)
-    let functional_buf_types = ['quickfix', 'help', 'nofile', 'terminal']
-    if winnr('$') > 1 && (index(functional_buf_types, &bt) >= 0)
-        let norm_wins = filter(range(1, winnr('$')),
-                    \ 'index(functional_buf_types, getbufvar(winbufnr(v:val), "&bt")) == -1')
+    if winnr('$') > 1 && (index(s:functional_buf_types, &bt) >= 0)
+        let norm_wins = filter(range(1, winnr('$')), 'index(s:functional_buf_types, getbufvar(winbufnr(v:val), "&bt")) == -1')
         let norm_win = !empty(norm_wins) ? norm_wins[0] : 0
         exe norm_win . 'winc w'
     endif
@@ -95,7 +95,6 @@ function! ToggleFileEncoding()
 endfunc
 
 function! BufferActions(action)
-    let functional_buf_types = ['quickfix', 'help', 'nofile', 'terminal']
 
     if (bufname("%") == 'vimspector.Console' || 
                 \ bufname("%") == 'vimspector.Output:stderr' || 
@@ -116,27 +115,25 @@ function! BufferActions(action)
         return 0
     endif
 
-    if (&buftype ==# 'quickfix' || &buftype ==# 'terminal')
+    if (&buftype ==# 'nofile' || &buftype ==# 'quickfix' || &buftype ==# 'terminal')
         return 0
     endif
 
     if a:action == 'next'
         execute ':bnext'
-        " if (&buftype ==# 'quickfix')
-        if (index(functional_buf_types, &bt) >= 0)
+        if (index(s:functional_buf_types, &bt) >= 0)
             execute ':bnext'
         endif
     elseif a:action == 'previous'
         execute ':bprevious'
-        " if (&buftype ==# 'quickfix')
-        if (index(functional_buf_types, &bt) >= 0)
+        if (index(s:functional_buf_types, &bt) >= 0)
             execute ':bprevious'
         endif
     elseif a:action == 'close'
-        execute ':Bdelete'
+        execute ':Bdelete!'
     elseif a:action == 'alternate'
         execute ':b#'
-        if (index(functional_buf_types, &bt) >= 0)
+        if (index(s:functional_buf_types, &bt) >= 0)
             execute ':b#'
         endif
     endif
@@ -175,11 +172,6 @@ set guioptions-=L "remove left-hand scroll bar
 
 " Syntax Hightlight.
 syntax enable
-
-" colorscheme desert
-" cd ~/.vim/colors
-" curl -o molokai.vim https://raw.githubusercontent.com/tomasr/molokai/master/colors/molokai.vim
-" colorscheme molokai
 
 let g:rehash256 = 1
 
@@ -223,8 +215,7 @@ set secure
 set completeopt=menu,menuone,noselect
 
 " Plugins
-" call plug#begin('~/.vim/plugged')
-call plug#begin()
+call plug#begin('~/.vim/plugged')
     Plug 'godlygeek/tabular'
     Plug 'itchyny/vim-cursorword'
     Plug 'roxma/vim-paste-easy'
@@ -235,9 +226,10 @@ call plug#begin()
     Plug 'mg979/vim-visual-multi'
     Plug 'chaoren/vim-wordmotion'
     Plug 'editorconfig/editorconfig-vim'
+    Plug 'khaveesh/vim-fish-syntax'
 
-    Plug 'dense-analysis/ale'
-    Plug 'hrsh7th/vim-vsnip'
+    " Plug 'dense-analysis/ale'
+    " Plug 'hrsh7th/vim-vsnip'
 
     " Git
     Plug 'tpope/vim-fugitive'
@@ -247,11 +239,15 @@ call plug#begin()
     Plug 'lewis6991/gitsigns.nvim'
 
     Plug 'dracula/vim', { 'as': 'dracula' }
+    " Plug 'dylanaraps/wal.vim'
 
     " Sidebar
     Plug 'scrooloose/nerdtree'
     Plug 'Xuyuanp/nerdtree-git-plugin'
     Plug 'ryanoasis/vim-devicons' " Must load after Nerdtree
+
+    " Autocomplete
+    Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
     " Neovim excl. plugins
     if has('nvim')
@@ -260,14 +256,11 @@ call plug#begin()
         Plug 'nvim-treesitter/nvim-treesitter-context'
         Plug 'nvim-lua/plenary.nvim' " telescope requirement
         Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.x' }
-        Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+        Plug 'fannheyward/telescope-coc.nvim'
     else
         Plug 'jeetsukumaran/vim-buffergator'
         Plug 'junegunn/fzf'
         Plug 'mhinz/vim-grepper'
-        Plug 'Shougo/deoplete.nvim'
-        Plug 'roxma/nvim-yarp'
-        Plug 'roxma/vim-hug-neovim-rpc'
     endif
 
     " IDE like plugins
@@ -283,15 +276,6 @@ call plug#begin()
         Plug 'ycm-core/YouCompleteMe'
     endif
 call plug#end()
-
-" Autocomplete
-let g:deoplete#enable_at_startup = 1
-
-call deoplete#custom#source('_', 'matchers', ['matcher_fuzzy', 'matcher_length'])
-call deoplete#custom#option({
-\ 'auto_complete_delay': 0,
-\ 'sources': { 'php': ['ale', 'omni', 'buffer'], '_': ['buffer'] }
-\ })
 
 " Always show statusline.
 set laststatus=2
@@ -346,7 +330,8 @@ nnoremap <C-j> :call BufferActions('previous')<CR>
 nnoremap <C-x> :call BufferActions('close')<CR>
 nnoremap <C-h> :call BufferActions('alternate')<CR>
 
-map <C-g> :ALEGoToDefinition<CR>
+" map <C-g> :ALEGoToDefinition<CR>
+map <C-g> :Telescope coc definitions
 
 " Vim Bufferline
 let g:bufferline_echo = 0
@@ -360,8 +345,10 @@ noremap <F1> :echo resolve(expand('%:p'))<CR>
 noremap <F2> :set wrap!<CR>
 
 " Mouse
-" set mouse=a
-" set ttymouse=sgr
+set mouse=
+if (has('ttymouse'))
+    set ttymouse=
+endif
 noremap <F3> :call ToggleMouse()<CR>
 
 " Set path on NERDTree
@@ -412,12 +399,14 @@ let g:ale_lint_on_insert_leave = 1
 let g:ale_open_list = 0
 let g:ale_keep_list_window_open = 0
 let g:ale_completion_enabled = 0
+let g:ale_disable_lsp = 1
 
 let g:airline_left_sep = ''
 let g:airline_right_sep = ''
 
 " Airline Theme
-let g:airline_theme='luna'
+" let g:airline_theme='luna'
+let g:airline_theme='dracula'
 
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#tab_nr_type = 1 " tab number
@@ -428,7 +417,7 @@ let g:airline#extensions#tabline#fnametruncate = 0
 let g:airline#extensions#tabline#fnamecollapse = 2
 let g:airline#extensions#tabline#fnamemod = ':t'
 
-let g:airline#extensions#ale#enabled = 1
+let g:airline#extensions#coc#enabled = 1
 
 let g:airline#extensions#tabline#left_sep = ' '
 let g:airline#extensions#tabline#left_alt_sep = ''
@@ -469,14 +458,16 @@ let g:maximizer_set_default_mapping = 0
 
 map <C-z> :MaximizerToggle<CR>
 
+nnoremap <silent> <Tab> :
+
 " TMUX
 let g:tmux_navigator_no_mappings = 1
 
-nnoremap <silent> <C-b>h :TmuxNavigateLeft<CR>
-nnoremap <silent> <C-b>j :TmuxNavigateDown<CR>
-nnoremap <silent> <C-b>k :TmuxNavigateUp<CR>
-nnoremap <silent> <C-b>l :TmuxNavigateRight<CR>
-nnoremap <silent> <C-b>b :TmuxNavigatePrevious<CR>
+nnoremap <silent> <C-w>h :TmuxNavigateLeft<CR>
+nnoremap <silent> <C-w>j :TmuxNavigateDown<CR>
+nnoremap <silent> <C-w>k :TmuxNavigateUp<CR>
+nnoremap <silent> <C-w>l :TmuxNavigateRight<CR>
+nnoremap <silent> <C-w>b :TmuxNavigatePrevious<CR>
 
 map <C-l> :tabprevious<CR>
 map <C-S-l> :tabnext<CR>
@@ -511,16 +502,31 @@ nnoremap <ESC> :nohlsearch<CR>
 
 autocmd FileType * setlocal autoindent
 
-inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+if exists('g:plugs["coc.nvim"]')
+    inoremap <expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
+    inoremap <expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
 
-inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+    inoremap <expr> <C-j> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
+    inoremap <expr> <C-k> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
 
-inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
+    inoremap <expr> <Esc> coc#pum#visible() ? coc#pum#cancel() : "\<Esc>"
+
+    inoremap <expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+
+    hi CocSearch ctermfg=12 guifg=#18A3FF
+    hi CocMenuSel ctermbg=108 guibg=#13354A 
+else
+    inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+    inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+    inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<Tab>"
+    inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+    inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
+endif
 
 if has("unix")
-    inoremap <silent><expr> <C-Space> match(&runtimepath, 'deoplete') != -1 ? deoplete#complete() : "\<c-x><c-o>"
+    inoremap <silent><expr> <c-Space> coc#refresh()
 elseif has("win32")
     inoremap <C-@> <c-x><c-o>
 endif
@@ -528,6 +534,12 @@ endif
 " vim-visual-multi
 let g:VM_maps = {}
 let g:VM_maps['Find Under'] = ''
+
+" cd ~/.vim/colors
+" curl -o molokai.vim https://raw.githubusercontent.com/tomasr/molokai/master/colors/molokai.vim
+" colorscheme molokai
+" colorscheme desert
+" colorscheme wal
 
 lua <<EOF
 if vim.fn.has('nvim') == 1 then
@@ -567,12 +579,22 @@ if vim.fn.has('nvim') == 1 then
       current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>'
     }
 
-    require'lspconfig'.phpactor.setup{}
-    require'lspconfig'.psalm.setup{
-        cmd = {"psalm", "--language-server"}
-    }
-    require'lspconfig'.eslint.setup {}
-    require'lspconfig'.tsserver.setup{}
+    require("telescope").setup({
+        extensions = {
+            coc = {
+                prefer_locations = true, -- always use Telescope locations to preview definitions/declarations/implementations etc
+            }
+        },
+    })
+    require('telescope').load_extension('coc')
+
+    -- require'lspconfig'.phpactor.setup{}
+    -- require'lspconfig'.psalm.setup{
+    --     cmd = {"psalm", "--language-server"}
+    -- }
+    -- require'lspconfig'.eslint.setup {}
+    -- require'lspconfig'.tsserver.setup{}
+    -- require'lspconfig'.vimls.setup{}
 
     -- Disable LSP inline messages
     vim.diagnostic.config({
