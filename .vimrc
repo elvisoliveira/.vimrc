@@ -381,7 +381,7 @@ else
 endif
 
 " Open buffer on external editor
-noremap <F9> :silent exec "!(subl % &) > /dev/null"<CR>
+noremap <F9> :silent exec "!(scite % &) > /dev/null"<CR>
 
 " Toggle BOM
 noremap <F10> :set bomb!<CR>
@@ -540,6 +540,20 @@ let g:VM_maps['Find Under'] = ''
 " colorscheme molokai
 " colorscheme desert
 " colorscheme wal
+
+highlight TelescopePromptTitle guifg=#1b1f27 guibg=#e06c75
+highlight TelescopePromptPrefix guifg=#e06c75
+highlight TelescopePromptNormal guibg=#252931
+highlight TelescopePromptBorder guifg=#252931 guibg=#252931
+
+highlight TelescopeResultsNormal guibg=#1b1f27
+highlight TelescopeResultsBorder guifg=#1b1f27 guibg=#1b1f27
+
+highlight TelescopePreviewTitle guifg=#1b1f27 guibg=#98c379
+highlight TelescopePreviewNormal guibg=#252931
+highlight TelescopePreviewBorder guifg=#252931 guibg=#252931
+
+highlight TelescopeSelection guifg=#B0BEC5 guibg=#252931
 
 lua <<EOF
 if vim.fn.has('nvim') == 1 then
