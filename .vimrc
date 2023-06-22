@@ -227,6 +227,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'chaoren/vim-wordmotion'
     Plug 'editorconfig/editorconfig-vim'
     Plug 'khaveesh/vim-fish-syntax'
+    Plug 'stevearc/stickybuf.nvim'
 
     " Plug 'dense-analysis/ale'
     " Plug 'hrsh7th/vim-vsnip'
@@ -352,13 +353,7 @@ endif
 noremap <F3> :call ToggleMouse()<CR>
 
 " Set path on NERDTree
-noremap <F4> :call SetPath()<CR>
-
-" Remove empty lines
-noremap <F5> :g/\v(^\s\t*$)/d<CR>
-
-" Trim line endings
-noremap <F6> :%s/\v(\s+$\|\t+$)//g<CR>
+" noremap <F4> :call SetPath()<CR>
 
 " Fuzzyfinder
 " GREP
@@ -381,16 +376,16 @@ else
 endif
 
 " Open buffer on external editor
-noremap <F9> :silent exec "!(scite % &) > /dev/null"<CR>
+noremap <F9> :silent exec "!(wine \"$HOME/.wine/drive_c/Program Files/Notepad++/notepad++.exe\" % &) > /dev/null"<CR>
 
 " Toggle BOM
-noremap <F10> :set bomb!<CR>
+noremap <F4> :set bomb!<CR>
 
 " Toggle File Fomat
-noremap <F11> :call ToggleFileformat()<CR>
+noremap <F5> :call ToggleFileformat()<CR>
 
 " Toggle File Encode
-noremap <F12> :call ToggleFileEncoding()<CR>
+noremap <F6> :call ToggleFileEncoding()<CR>
 
 let g:ale_linters = { 'php': ['php', 'psalm', 'cspell'], 'vue': ['vue', 'eslint', 'vls', 'jshint', 'jscs', 'cspell', 'standard'] }
 let g:ale_linters_explicit = 1
@@ -594,6 +589,14 @@ if vim.fn.has('nvim') == 1 then
     }
 
     require("telescope").setup({
+        defaults = {
+            file_ignore_patterns = {
+                "^./.git/",
+                "^node_modules/",
+                "^vendor/",
+                "%tests/"
+            }
+        },
         extensions = {
             coc = {
                 prefer_locations = true, -- always use Telescope locations to preview definitions/declarations/implementations etc
@@ -601,6 +604,8 @@ if vim.fn.has('nvim') == 1 then
         },
     })
     require('telescope').load_extension('coc')
+
+    require("stickybuf").setup()
 
     -- require'lspconfig'.phpactor.setup{}
     -- require'lspconfig'.psalm.setup{
