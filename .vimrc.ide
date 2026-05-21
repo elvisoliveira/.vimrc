@@ -1,7 +1,13 @@
 " Author: Elvis Oliveira - http://github.com/elvisoliveira "
 " vim: syntax=vim
 set nocompatible
-source ~/.vimrc
+let s:vimrc_dir = fnamemodify(expand('<sfile>:p'), ':h')
+
+if !exists('g:elvis_vimrc_loaded')
+    execute 'source ' . fnameescape(s:vimrc_dir . '/.vimrc')
+endif
+
+let g:elvis_vimrc_ide_loaded = 1
 
 let s:enabled = 0
 function! RightSidebarToggle()

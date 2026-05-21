@@ -1,5 +1,7 @@
 " Author: Elvis Oliveira - http://github.com/elvisoliveira "
+let g:elvis_vimrc_loaded = 1
 let s:enabled = 0
+
 function! RightSidebarToggle()
     let b = bufnr("%")
     if s:enabled
@@ -213,6 +215,14 @@ set secure
 
 " Make Vim completion popup menu work just like in an IDE
 set completeopt=menu,menuone,noselect
+
+" Load gitignored local secrets (API keys, etc.) if present.
+" resolve() dereferences the symlink (~/.vimrc -> ~/.env/.vimrc/.vimrc) so the
+" lookup happens next to the real file, not next to the symlink.
+let s:secrets_file = fnamemodify(resolve(expand('<sfile>:p')), ':h') . '/.vimrc.secrets'
+if filereadable(s:secrets_file)
+    execute 'source ' . fnameescape(s:secrets_file)
+endif
 
 " Plugins
 call plug#begin('~/.vim/plugged')

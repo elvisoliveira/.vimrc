@@ -1,8 +1,15 @@
 ﻿" Author: Elvis Oliveira - http://github.com/elvisoliveira "
 " vim: syntax=vim
 set nocompatible
-source ~/.vimrc
-source ~/.vimrc.ide
+let s:vimrc_dir = fnamemodify(expand('<sfile>:p'), ':h')
+
+if !exists('g:elvis_vimrc_loaded')
+    execute 'source ' . fnameescape(s:vimrc_dir . '/.vimrc')
+endif
+
+if !exists('g:elvis_vimrc_ide_loaded')
+    execute 'source ' . fnameescape(s:vimrc_dir . '/.vimrc.ide')
+endif
 
 function! s:StartJavaDebugging()
 	if s:jdt_ls_debugger_port <= 0
