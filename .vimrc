@@ -292,8 +292,6 @@ else
   set clipboard=unnamedplus "Linux
 endif
 
-filetype off
-filetype plugin on
 filetype plugin indent on
 
 " Read .vimrc files of the file directory
@@ -323,8 +321,10 @@ call plug#begin('~/.vim/plugged')
     Plug 'mg979/vim-visual-multi'
     Plug 'chaoren/vim-wordmotion'
     Plug 'editorconfig/editorconfig-vim'
+    Plug 'tpope/vim-sleuth'
     Plug 'khaveesh/vim-fish-syntax'
     Plug 'stevearc/stickybuf.nvim'
+    Plug 'digitaltoad/vim-pug'
 
     " Plug 'dense-analysis/ale'
     " Plug 'hrsh7th/vim-vsnip'
@@ -336,7 +336,11 @@ call plug#begin('~/.vim/plugged')
     " Plug 'airblade/vim-gitgutter'
     Plug 'lewis6991/gitsigns.nvim'
 
-    Plug 'dracula/vim', { 'as': 'dracula' }
+    if has('nvim')
+        Plug 'EdenEast/nightfox.nvim'
+    else
+        Plug 'dracula/vim', { 'as': 'dracula' }
+    endif
     " Plug 'dylanaraps/wal.vim'
 
     " Sidebar
@@ -348,22 +352,22 @@ call plug#begin('~/.vim/plugged')
     if has('nvim')
         Plug 'neovim/nvim-lspconfig'
         Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-        Plug 'nvim-treesitter/nvim-treesitter-context'
+        " Plug 'nvim-treesitter/nvim-treesitter-context'
         Plug 'nvim-lua/plenary.nvim' " telescope requirement
         Plug 'nvim-telescope/telescope.nvim', { 'tag': 'v0.1.9' }
+        Plug 'olimorris/codecompanion.nvim', { 'tag': 'v19.9.0' }
         Plug 'echasnovski/mini.completion'
+        Plug 'akinsho/toggleterm.nvim', { 'tag': 'v2.13.1' }
     else
         Plug 'jeetsukumaran/vim-buffergator'
         Plug 'junegunn/fzf'
         Plug 'mhinz/vim-grepper'
     endif
 
-    " IDE like plugins
-    if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.ide" || v:argv[-2] =~ ".vimrc.java"))
-        Plug 'elvisoliveira/vim-lotr'
-        Plug 'preservim/tagbar'
-        Plug 'breuckelen/vim-resize'
-    endif
+    " Optional IDE profile plugins. The extra mappings/config live in ~/.vimrc.ide.
+    Plug 'elvisoliveira/vim-lotr'
+    Plug 'preservim/tagbar'
+    Plug 'breuckelen/vim-resize'
 
     " Only on Java [Eclipse] projects
     if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.java"))
@@ -378,6 +382,10 @@ set laststatus=2
 " Use 256 colours.
 set t_Co=256
 
+if has('nvim') && has('termguicolors')
+    set termguicolors
+endif
+
 " Show all hidden characters.
 set listchars=eol:¬,tab:>·,trail:~,extends:>,precedes:<
 if has("patch-7.4.710") | set listchars+=space:· | endif
@@ -387,7 +395,7 @@ set list
 set hidden
 
 " Wrap off
-set wrap!
+set nowrap
 
 " ctrl-c for copy
 if has("gui_running")
@@ -410,6 +418,7 @@ let g:NERDTreeRespectWildIgnore=1
 let g:NERDTreeShowHidden=1
 let g:NERDTreeChDirMode=2
 let g:NERDTreeNodeDelimiter="\u00a0"
+let g:NERDTreeIgnore = ['\.profraw$']
 
 " Buffergator
 let g:buffergator_viewport_split_policy="R"
@@ -472,8 +481,11 @@ else
     endif
 endif
 
-" Open buffer on external editor
-noremap <F9> :silent exec "!(wine \"$HOME/.wine/drive_c/Program Files/Notepad++/notepad++.exe\" % &) > /dev/null"<CR>
+" Open buffer on external editor. wine is Linux-only; no-op elsewhere
+" so the binding is safe to load on macOS / WSL.
+if executable('wine')
+    noremap <F9> :silent exec "!(wine \"$HOME/.wine/dosdevices/c:/Program Files/Notepad++/notepad++.exe\" % &) > /dev/null"<CR>
+endif
 
 " Toggle BOM
 noremap <F4> :set bomb!<CR>
@@ -489,7 +501,11 @@ let g:airline_right_sep = ''
 
 " Airline Theme
 " let g:airline_theme='luna'
-let g:airline_theme='dracula'
+if has('nvim')
+    " let g:airline_theme='molokai'
+else
+    let g:airline_theme='dracula'
+endif
 
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#tab_nr_type = 1 " tab number
@@ -522,10 +538,10 @@ vmap > >gv
 " Resize Buffer
 let g:vim_resize_disable_auto_mappings = 1
 
-nmap <C-Up>    : CmdResizeUp<CR>
-nmap <C-Left>  : CmdResizeLeft<CR>
-nmap <C-Down>  : CmdResizeDown<CR>
-nmap <C-Right> : CmdResizeRight<CR>
+" nmap <C-Up>    : CmdResizeUp<CR>
+" nmap <C-Left>  : CmdResizeLeft<CR>
+" nmap <C-Down>  : CmdResizeDown<CR>
+" nmap <C-Right> : CmdResizeRight<CR>
 
 nnoremap <C-u> 10k
 nnoremap <C-d> 10j
@@ -624,6 +640,25 @@ augroup END
 " colorscheme molokai
 " colorscheme desert
 " colorscheme wal
+" Re-apply transparency whenever the colorscheme is (re)loaded so the
+" terminal's background opacity (e.g. alacritty) shows through.
+augroup TransparentBackground
+    autocmd!
+    autocmd ColorScheme * highlight Normal      guibg=NONE ctermbg=NONE
+    autocmd ColorScheme * highlight NormalNC    guibg=NONE ctermbg=NONE
+    autocmd ColorScheme * highlight NormalFloat guibg=NONE ctermbg=NONE
+    autocmd ColorScheme * highlight SignColumn  guibg=NONE ctermbg=NONE
+    autocmd ColorScheme * highlight LineNr      guibg=NONE ctermbg=NONE
+    autocmd ColorScheme * highlight EndOfBuffer guibg=NONE ctermbg=NONE
+augroup END
+
+if has('nvim')
+    lua require('nightfox').setup({ options = { transparent = true } })
+    " silent! colorscheme carbonfox
+    silent! colorscheme dracula
+else
+    silent! colorscheme dracula
+endif
 
 highlight TelescopePromptTitle guifg=#1b1f27 guibg=#e06c75
 highlight TelescopePromptPrefix guifg=#e06c75
@@ -650,26 +685,14 @@ highlight TelescopePreviewLine guibg=#3a4060
 
 lua <<EOF
 if vim.fn.has('nvim') == 1 then
-    require'nvim-treesitter.configs'.setup {
-        ensure_installed = {"javascript", "html", "css", "php", "vim", "vue", "json", "python", "lua"},
-        sync_install = false,
-        ignore_install = {},
-        highlight = {
-            enable = true,
-            disable = {},
-            additional_vim_regex_highlighting = false
-        }
-    }
-
-    require'treesitter-context'.setup{
-        enable = true,
-        max_lines = 0,
-        patterns = {
-            -- default = {'class', 'function', 'foreach', 'method', 'while', 'if', 'switch', 'case' }
-        },
-        zindex = 20,
-        mode = 'topline'
-    }
+    local ok_ts, ts = pcall(require, 'nvim-treesitter.configs')
+    if ok_ts then
+        ts.setup({
+            ensure_installed = { 'typescript', 'tsx', 'javascript', 'jsdoc', 'html', 'css', 'json' },
+            highlight = { enable = true, additional_vim_regex_highlighting = false },
+            indent = { enable = true },
+        })
+    end
 
     local ok_completion, completion = pcall(require, 'mini.completion')
     if ok_completion then
@@ -727,6 +750,79 @@ if vim.fn.has('nvim') == 1 then
     local ok_stickybuf, stickybuf = pcall(require, 'stickybuf')
     if ok_stickybuf then
         stickybuf.setup()
+    end
+
+    local ok_codecompanion, codecompanion = pcall(require, 'codecompanion')
+    if ok_codecompanion then
+        codecompanion.setup({
+            display = {
+                chat = {
+                    window = {
+                        layout = "vertical",
+                        position = "right",
+                        width = 0.45,
+                    },
+                },
+            },
+            adapters = {
+                anthropic = function()
+                    return require("codecompanion.adapters").extend("anthropic", {
+                        env = { api_key = "ANTHROPIC_API_KEY" },
+                        schema = {
+                            model = { default = "claude-sonnet-4-5-20250929" },
+                        },
+                    })
+                end,
+            },
+            strategies = {
+                chat = {
+                    adapter = "anthropic",
+                },
+                inline = {
+                    adapter = "anthropic",
+                },
+                cmd = {
+                    adapter = "anthropic",
+                },
+            },
+        })
+
+        vim.keymap.set("n", "<C-a>", "<Cmd>CodeCompanionChat Toggle<CR>", { silent = true })
+        vim.keymap.set("v", "<C-a>", "<Cmd>CodeCompanion<CR>", { silent = true })
+        vim.keymap.set({ "n", "v" }, "<C-S-a>", "<Cmd>CodeCompanionActions<CR>", { silent = true })
+
+        vim.api.nvim_create_autocmd("FileType", {
+            pattern = { "codecompanion", "codecompanion_input" },
+            callback = function(args)
+                vim.keymap.set({ "n", "i" }, "<C-x>", "<Cmd>CodeCompanionChat Close<CR>", {
+                    buffer = args.buf,
+                    silent = true,
+                })
+            end,
+        })
+    end
+
+    local ok_toggleterm, toggleterm = pcall(require, 'toggleterm')
+    if ok_toggleterm then
+        toggleterm.setup({
+            open_mapping      = [[<F12>]],
+            shell             = vim.fn.executable('fish') == 1 and 'fish' or vim.o.shell,
+            direction         = 'float',
+            start_in_insert   = true,
+            insert_mappings   = true,
+            terminal_mappings = true,
+            persist_mode      = true,
+            float_opts = {
+                border   = 'curved',
+                winblend = 0,
+            },
+            highlights = {
+                NormalFloat = { guibg = 'NONE' },
+                FloatBorder = { guibg = 'NONE' },
+            },
+        })
+
+        vim.keymap.set('t', '<Esc><Esc>', [[<C-\><C-n>]], { silent = true })
     end
 
     if vim.fn.executable('biome') == 1 then
