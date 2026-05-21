@@ -176,48 +176,55 @@ function! ToggleFileEncoding()
     endif
 endfunc
 
+function! s:IsPluginBuffer()
+    let l:name = bufname('%')
+    return l:name =~# '^NERD_tree_'
+        \ || l:name =~# '^__Tagbar__'
+        \ || l:name ==# '__LOTR__'
+        \ || l:name ==# '[[buffergator-buffers]]'
+        \ || l:name =~# '^vimspector\.'
+endfunc
+
+function! s:IsFunctionalBuffer()
+    return index(s:functional_buf_types, &buftype) >= 0 || s:IsPluginBuffer()
+endfunc
+
+function! s:SkipFunctional(cmd)
+    " Step past consecutive functional buffers, capped to avoid infinite loops
+    " when every listed buffer is functional.
+    let l:start = bufnr('%')
+    let l:tries = 0
+    while s:IsFunctionalBuffer() && l:tries < 20
+        execute a:cmd
+        if bufnr('%') == l:start
+            break
+        endif
+        let l:tries += 1
+    endwhile
+endfunc
+
 function! BufferActions(action)
-
-    if (bufname("%") == 'vimspector.Console' || 
-                \ bufname("%") == 'vimspector.Output:stderr' || 
-                \ bufname("%") == 'vimspector.Output:server')
+    if bufname('%') =~# '^vimspector\.\(Console\|Output:\)'
         call feedkeys(":VimspectorShowOutput \<Tab>", 'tn')
-    endif
-
-    if (bufname("%") == 'NERD_tree_1' || 
-                \ bufname("%") == '__Tagbar__.1' || 
-                \ bufname("%") == '__LOTR__' || 
-                \ bufname("%") == '[[buffergator-buffers]]' || 
-                \ bufname("%") == 'vimspector.Console' || 
-                \ bufname("%") == 'vimspector.Output:stderr' || 
-                \ bufname("%") == 'vimspector.Output:server' || 
-                \ bufname("%") == 'vimspector.Variables' || 
-                \ bufname("%") == 'vimspector.Watches' || 
-                \ bufname("%") == 'vimspector.StackTrace')
         return 0
     endif
 
-    if (&buftype ==# 'nofile' || &buftype ==# 'quickfix' || &buftype ==# 'terminal')
+    if s:IsFunctionalBuffer()
         return 0
     endif
 
     if a:action == 'next'
         execute ':bnext'
-        if (index(s:functional_buf_types, &bt) >= 0)
-            execute ':bnext'
-        endif
+        call s:SkipFunctional(':bnext')
     elseif a:action == 'previous'
         execute ':bprevious'
-        if (index(s:functional_buf_types, &bt) >= 0)
-            execute ':bprevious'
-        endif
+        call s:SkipFunctional(':bprevious')
     elseif a:action == 'close'
         execute ':Bdelete!'
+        call s:SkipFunctional(':bnext')
     elseif a:action == 'alternate'
         execute ':b#'
-        if (index(s:functional_buf_types, &bt) >= 0)
-            execute ':b#'
-        endif
+        call s:SkipFunctional(':bnext')
     endif
 endfunc
 
