@@ -344,17 +344,14 @@ call plug#begin('~/.vim/plugged')
     Plug 'Xuyuanp/nerdtree-git-plugin'
     Plug 'ryanoasis/vim-devicons' " Must load after Nerdtree
 
-    " Autocomplete
-    Plug 'neoclide/coc.nvim', {'branch': 'release'}
-
     " Neovim excl. plugins
     if has('nvim')
         Plug 'neovim/nvim-lspconfig'
         Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
         Plug 'nvim-treesitter/nvim-treesitter-context'
         Plug 'nvim-lua/plenary.nvim' " telescope requirement
-        Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.x' }
-        Plug 'fannheyward/telescope-coc.nvim'
+        Plug 'nvim-telescope/telescope.nvim', { 'tag': 'v0.1.9' }
+        Plug 'echasnovski/mini.completion'
     else
         Plug 'jeetsukumaran/vim-buffergator'
         Plug 'junegunn/fzf'
@@ -430,8 +427,7 @@ nnoremap <C-j> :call BufferActions('previous')<CR>
 nnoremap <C-x> :call BufferActions('close')<CR>
 nnoremap <C-h> :call BufferActions('alternate')<CR>
 
-" map <C-g> :ALEGoToDefinition<CR>
-map <C-g> :Telescope coc definitions
+nnoremap <silent> <C-*> <cmd>lua require('telescope.builtin').grep_string({ word_match = '-w' })<CR>
 
 " Vim Bufferline
 let g:bufferline_echo = 0
@@ -488,15 +484,6 @@ noremap <F5> :call ToggleFileformat()<CR>
 " Toggle File Encode
 noremap <F6> :call ToggleFileEncoding()<CR>
 
-let g:ale_linters = { 'php': ['php', 'psalm', 'cspell'], 'vue': ['vue', 'eslint', 'vls', 'jshint', 'jscs', 'cspell', 'standard'] }
-let g:ale_linters_explicit = 1
-let g:ale_lint_on_save = 0
-let g:ale_lint_on_insert_leave = 1
-let g:ale_open_list = 0
-let g:ale_keep_list_window_open = 0
-let g:ale_completion_enabled = 0
-let g:ale_disable_lsp = 1
-
 let g:airline_left_sep = ''
 let g:airline_right_sep = ''
 
@@ -513,7 +500,11 @@ let g:airline#extensions#tabline#fnametruncate = 0
 let g:airline#extensions#tabline#fnamecollapse = 2
 let g:airline#extensions#tabline#fnamemod = ':t'
 
-let g:airline#extensions#coc#enabled = 1
+" let g:airline_section_error = '%{airline#util#wrap(airline#extensions#coc#get_error(),0)}'
+" let g:airline_section_warning = '%{airline#util#wrap(airline#extensions#coc#get_warning(),0)}'
+
+" let g:airline#extensions#coc#stl_format_err = '%E{[%e(#%fe)]}'
+" let g:airline#extensions#coc#stl_format_warn = '%W{[%w(#%fw)]}'
 
 let g:airline#extensions#tabline#left_sep = ' '
 let g:airline#extensions#tabline#left_alt_sep = ''
@@ -596,35 +587,18 @@ nnoremap <ESC> :nohlsearch<CR>
 " autocmd   FileType   php          set   omnifunc=ale#completion#OmniFunc
 " autocmd   FileType   c            set   omnifunc=ccomplete#Complete
 
-autocmd FileType * setlocal autoindent
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
-if exists('g:plugs["coc.nvim"]')
-    inoremap <expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
-    inoremap <expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
+inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
-    inoremap <expr> <C-j> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
-    inoremap <expr> <C-k> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
-
-    inoremap <expr> <Esc> coc#pum#visible() ? coc#pum#cancel() : "\<Esc>"
-
-    inoremap <expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
-
-    hi CocSearch ctermfg=12 guifg=#18A3FF
-    hi CocMenuSel ctermbg=108 guibg=#13354A 
-else
-    inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-    inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-
-    inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<Tab>"
-    inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-
-    inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
-endif
+inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
 
 if has("unix")
-    inoremap <silent><expr> <c-Space> coc#refresh()
+    inoremap <C-Space> <C-x><C-o>
 elseif has("win32")
-    inoremap <C-@> <c-x><c-o>
+    inoremap <C-@> <C-x><C-o>
 endif
 
 " vim-visual-multi
@@ -665,6 +639,15 @@ highlight TelescopePreviewBorder guifg=#252931 guibg=#252931
 
 highlight TelescopeSelection guifg=#B0BEC5 guibg=#252931
 
+" Highlight the matched substring in result rows. Bright + bold so it stays
+" visible on both the normal (#1b1f27) and selected (#252931) row backgrounds.
+highlight TelescopeMatching guifg=#ffaa00 gui=bold
+
+" Match highlight inside the PREVIEW pane. Uses a background color so it
+" stays visible even when treesitter has painted the foreground.
+highlight TelescopePreviewMatch guifg=#1b1f27 guibg=#ffaa00 gui=bold
+highlight TelescopePreviewLine guibg=#3a4060
+
 lua <<EOF
 if vim.fn.has('nvim') == 1 then
     require'nvim-treesitter.configs'.setup {
@@ -688,51 +671,70 @@ if vim.fn.has('nvim') == 1 then
         mode = 'topline'
     }
 
-    require('gitsigns').setup {
-      signcolumn = true,
-      numhl = false,
-      linehl = false,
-      word_diff = true,
-      current_line_blame = true,
-      current_line_blame_opts = {
-        virt_text = true,
-        virt_text_pos = 'eol',
-        delay = 0,
-        ignore_whitespace = false,
-      },
-      current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>'
-    }
+    local ok_completion, completion = pcall(require, 'mini.completion')
+    if ok_completion then
+        completion.setup()
+    end
 
-    require("telescope").setup({
-        defaults = {
-            file_ignore_patterns = {
-                "^./.git/",
-                "^node_modules/",
-                "^vendor/",
-                "%tests/"
-            }
-        },
-        extensions = {
-            coc = {
-                prefer_locations = true, -- always use Telescope locations to preview definitions/declarations/implementations etc
-            }
-        },
-    })
-    require('telescope').load_extension('coc')
+    local ok_gitsigns, gitsigns = pcall(require, 'gitsigns')
+    if ok_gitsigns then
+        gitsigns.setup {
+          signcolumn = true,
+          numhl = false,
+          linehl = false,
+          word_diff = true,
+          current_line_blame = true,
+          current_line_blame_opts = {
+            virt_text = true,
+            virt_text_pos = 'eol',
+            delay = 0,
+            ignore_whitespace = false,
+          },
+          current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>'
+        }
+    end
 
-    require("stickybuf").setup()
+    local ok_telescope, telescope = pcall(require, 'telescope')
+    if ok_telescope then
+        telescope.setup({
+            defaults = {
+                vimgrep_arguments = {
+                    "rg",
+                    "--color=never",
+                    "--no-heading",
+                    "--with-filename",
+                    "--line-number",
+                    "--column",
+                    "--smart-case",
+                    "--hidden",
+                    "--glob=!**/.git/*",
+                },
+                file_ignore_patterns = {
+                    "^./.git/",
+                    "^node_modules/",
+                    "^vendor/",
+                    "%tests/"
+                }
+            },
+            pickers = {
+                find_files = {
+                    hidden = true,
+                },
+            },
+        })
+    end
 
-    -- require'lspconfig'.phpactor.setup{}
-    -- require'lspconfig'.psalm.setup{
-    --     cmd = {"psalm", "--language-server"}
-    -- }
-    -- require'lspconfig'.eslint.setup {}
-    -- require'lspconfig'.tsserver.setup{}
-    -- require'lspconfig'.vimls.setup{}
+    local ok_stickybuf, stickybuf = pcall(require, 'stickybuf')
+    if ok_stickybuf then
+        stickybuf.setup()
+    end
 
-    -- Disable LSP inline messages
+    if vim.fn.executable('biome') == 1 then
+        vim.lsp.enable('biome')
+    end
+
     vim.diagnostic.config({
-        virtual_text = false
+        virtual_text = true
     })
 end
 EOF
