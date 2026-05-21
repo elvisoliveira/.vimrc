@@ -355,7 +355,6 @@ call plug#begin('~/.vim/plugged')
         " Plug 'nvim-treesitter/nvim-treesitter-context'
         Plug 'nvim-lua/plenary.nvim' " telescope requirement
         Plug 'nvim-telescope/telescope.nvim', { 'tag': 'v0.1.9' }
-        Plug 'olimorris/codecompanion.nvim', { 'tag': 'v19.9.0' }
         Plug 'echasnovski/mini.completion'
         Plug 'akinsho/toggleterm.nvim', { 'tag': 'v2.13.1' }
     else
@@ -750,56 +749,6 @@ if vim.fn.has('nvim') == 1 then
     local ok_stickybuf, stickybuf = pcall(require, 'stickybuf')
     if ok_stickybuf then
         stickybuf.setup()
-    end
-
-    local ok_codecompanion, codecompanion = pcall(require, 'codecompanion')
-    if ok_codecompanion then
-        codecompanion.setup({
-            display = {
-                chat = {
-                    window = {
-                        layout = "vertical",
-                        position = "right",
-                        width = 0.45,
-                    },
-                },
-            },
-            adapters = {
-                anthropic = function()
-                    return require("codecompanion.adapters").extend("anthropic", {
-                        env = { api_key = "ANTHROPIC_API_KEY" },
-                        schema = {
-                            model = { default = "claude-sonnet-4-5-20250929" },
-                        },
-                    })
-                end,
-            },
-            strategies = {
-                chat = {
-                    adapter = "anthropic",
-                },
-                inline = {
-                    adapter = "anthropic",
-                },
-                cmd = {
-                    adapter = "anthropic",
-                },
-            },
-        })
-
-        vim.keymap.set("n", "<C-a>", "<Cmd>CodeCompanionChat Toggle<CR>", { silent = true })
-        vim.keymap.set("v", "<C-a>", "<Cmd>CodeCompanion<CR>", { silent = true })
-        vim.keymap.set({ "n", "v" }, "<C-S-a>", "<Cmd>CodeCompanionActions<CR>", { silent = true })
-
-        vim.api.nvim_create_autocmd("FileType", {
-            pattern = { "codecompanion", "codecompanion_input" },
-            callback = function(args)
-                vim.keymap.set({ "n", "i" }, "<C-x>", "<Cmd>CodeCompanionChat Close<CR>", {
-                    buffer = args.buf,
-                    silent = true,
-                })
-            end,
-        })
     end
 
     local ok_toggleterm, toggleterm = pcall(require, 'toggleterm')
