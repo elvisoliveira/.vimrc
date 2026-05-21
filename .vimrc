@@ -32,8 +32,9 @@ function! FZFOpen(cmd)
 endfunc
 
 function! IsWSL()
-    " Check WSL
-    if has("unix")
+    " Check WSL. /proc/version exists on Linux (including WSL) but not on
+    " macOS, so guard the read or readfile() errors on Darwin.
+    if has("unix") && filereadable("/proc/version")
         let lines = readfile("/proc/version")
         if lines[0] =~ "Microsoft"
             return 1
@@ -45,17 +46,62 @@ endfunc
 function! GetSelectedText()
     normal gv"xy
     let reg = getreg("x")
-    let reg = substitute(reg, '\', '\\\\', 'g')
-    let reg = substitute(reg, '"', '\\"', 'g')
     normal gv
-    return substitute(reg, '/', '\\/', 'g')
+    return reg
+endfunc
+
+function! CopyToClipboard(text)
+    call setreg('+', a:text)
+    call setreg('*', a:text)
+
+    " On TTY there is no system clipboard; route to tmux's paste buffer instead.
+    if empty($DISPLAY) && empty($WAYLAND_DISPLAY) && !empty($TMUX) && executable('tmux')
+        call system('tmux load-buffer -', a:text)
+        return
+    endif
+
+    if has('clipboard')
+        return
+    endif
+
+    let is_wayland = !empty($WAYLAND_DISPLAY) || !empty($XDG_SESSION_TYPE) && $XDG_SESSION_TYPE ==# 'wayland'
+
+    if is_wayland && executable('wl-copy')
+        " Wayland exposes clipboard and primary selection, but not secondary.
+        call system('wl-copy', a:text)
+        call system('wl-copy --primary', a:text)
+        return
+    endif
+
+    if executable('pbcopy')
+        call system('pbcopy', a:text)
+        return
+    endif
+
+    if IsWSL() && executable('clip.exe')
+        call system('clip.exe', a:text)
+        return
+    endif
+
+    if executable('xsel')
+        for selection in ['primary', 'secondary', 'clipboard']
+            call system('xsel --' . selection . ' --input', a:text)
+        endfor
+        return
+    endif
+
+    if executable('xclip')
+        for selection in ['primary', 'secondary', 'clipboard']
+            call system('xclip -in -selection ' . selection, a:text)
+        endfor
+        return
+    endif
+
+    echoerr 'No clipboard tool found. Install wl-clipboard, xsel, xclip, pbcopy or clip.exe.'
 endfunc
 
 function! SetXselClipboard()
-    let text = GetSelectedText()
-    for i in ["primary", "secondary", "clipboard"]
-        execute printf('call system("xsel --%s --input", "%s")', i, text)
-    endfor
+    call CopyToClipboard(GetSelectedText())
 endfunc
 
 function! SetPath()
@@ -67,6 +113,40 @@ function! SetPath()
             exec "cd " . nerd_root
         endif
     endif
+endfunc
+
+function! CopyCurrentBufferPath(use_visual)
+    let path = fnamemodify(expand('%:p'), ':.')
+
+    if empty(path)
+        echoerr 'Current buffer has no file path.'
+        return
+    endif
+
+    if a:use_visual
+        let start = line("'<")
+        let end = line("'>")
+        if start > end
+            let [start, end] = [end, start]
+        endif
+    else
+        let start = line('.')
+        let end = start
+    endif
+
+    let reference = path . ':' . start
+    if end != start
+        let reference .= '-' . end
+    endif
+
+    call CopyToClipboard(reference)
+    echo reference
+endfunc
+
+function! CopyCurrentProjectPath()
+    let path = fnamemodify(getcwd(), ':p')
+    call CopyToClipboard(path)
+    echo path
 endfunc
 
 function! ToggleMouse()
@@ -316,6 +396,8 @@ elseif has("win64") || has("win32") || has("win16") || IsWSL()
     vmap <C-c> :w !clip.exe<CR><CR>
 endif
 
+nnoremap <silent> <C-c> :call CopyToClipboard(expand('<cword>'))<CR>
+
 " NERDtree
 let g:NERDTreeMinimalUI=1
 let g:NERDTreeShowLineNumbers=1
@@ -350,7 +432,9 @@ let g:bufferline_echo = 0
 :command! -nargs=1 Silent execute ':silent !'.<q-args> | execute ':redraw!'
 
 " Show filepath.
-noremap <F1> :echo resolve(expand('%:p'))<CR>
+nnoremap <F1> :call CopyCurrentBufferPath(0)<CR>
+xnoremap <F1> :<C-u>call CopyCurrentBufferPath(1)<CR>
+nnoremap <S-F1> :call CopyCurrentProjectPath()<CR>
 
 " Toggle wrap
 noremap <F2> :set wrap!<CR>
@@ -539,6 +623,20 @@ endif
 " vim-visual-multi
 let g:VM_maps = {}
 let g:VM_maps['Find Under'] = ''
+
+" Mirror VM extend-mode yanks to the system clipboard.
+" VM writes yanks with setreg() directly (autoload/vm/ecmds1.vim :: fill_register),
+" which bypasses the yank operator and therefore the clipboard=unnamedplus
+" plumbing — so under Wayland, SSH, or a Vim without +clipboard the content
+" never reaches the OS clipboard. VM fires `User visual_multi_mappings`
+" every time it installs its buffer-local maps, so we piggyback on that
+" to wrap `y` with a post-yank call to CopyToClipboard (which already
+" dispatches to wl-copy / xsel / xclip).
+augroup VMYankClipboard
+    autocmd!
+    autocmd User visual_multi_mappings
+        \ nmap <silent><nowait><buffer> y <Plug>(VM-Yank):call CopyToClipboard(getreg('"'))<CR>
+augroup END
 
 " cd ~/.vim/colors
 " curl -o molokai.vim https://raw.githubusercontent.com/tomasr/molokai/master/colors/molokai.vim
