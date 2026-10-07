@@ -357,6 +357,7 @@ call plug#begin('~/.vim/plugged')
         Plug 'nvim-telescope/telescope.nvim', { 'tag': 'v0.1.9' }
         Plug 'echasnovski/mini.completion'
         Plug 'akinsho/toggleterm.nvim', { 'tag': 'v2.13.1' }
+        Plug 'folke/which-key.nvim'
     else
         Plug 'jeetsukumaran/vim-buffergator'
         Plug 'junegunn/fzf'
@@ -428,6 +429,12 @@ let g:buffergator_show_full_directory_path="bufname"
 
 map <C-n> :NERDTreeToggle<CR>
 map <C-f> :NERDTreeFind<CR>
+
+" <C-p> (mnemonic: Preview) opens the current file in Firefox. Defined
+" globally rather than via a FileType autocmd: at startup the command-line
+" file's FileType event is swallowed by another eager plugin, so a buffer-local
+" map would be missing for `nvim file.md`.
+nnoremap <silent> <C-p> :silent exec '!firefox ' . shellescape(expand('%:p')) . ' &' \| redraw!<CR>
 
 " Buffer Control
 nnoremap <C-k> :call BufferActions('next')<CR>
@@ -640,7 +647,7 @@ augroup END
 " colorscheme desert
 " colorscheme wal
 " Re-apply transparency whenever the colorscheme is (re)loaded so the
-" terminal's background opacity (e.g. alacritty) shows through.
+" terminal's background opacity (e.g. wezterm) shows through.
 augroup TransparentBackground
     autocmd!
     autocmd ColorScheme * highlight Normal      guibg=NONE ctermbg=NONE
@@ -749,6 +756,24 @@ if vim.fn.has('nvim') == 1 then
     local ok_stickybuf, stickybuf = pcall(require, 'stickybuf')
     if ok_stickybuf then
         stickybuf.setup()
+    end
+
+    -- which-key: popup reminding of keybindings. Auto-discovers mappings, so
+    -- pressing a prefix (<leader>, g, z, <C-w>, ...) and waiting shows the
+    -- available continuations. <leader>? lists every mapping for the buffer.
+    local ok_whichkey, whichkey = pcall(require, 'which-key')
+    if ok_whichkey then
+        whichkey.setup({})
+        -- Annotate existing direct mappings so they read nicely in the popup.
+        whichkey.add({
+            { '<C-p>', desc = 'Open current file in Firefox' },
+        })
+        -- <leader>? opens the full keymap list for the current buffer. Set as a
+        -- real keymap (not via which-key.add) so it works regardless of how
+        -- which-key installs its own triggers.
+        vim.keymap.set('n', '<leader>?', function()
+            whichkey.show({ global = false })
+        end, { desc = 'Buffer keymaps' })
     end
 
     local ok_toggleterm, toggleterm = pcall(require, 'toggleterm')
