@@ -156,16 +156,13 @@ set secure
 call plug#begin('~/.vim/plugged')
     Plug 'godlygeek/tabular'
     Plug 'itchyny/vim-cursorword'
-    Plug 'roxma/vim-paste-easy'
     Plug 'moll/vim-bbye'
     Plug 'christoomey/vim-tmux-navigator'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     Plug 'mg979/vim-visual-multi'
     Plug 'chaoren/vim-wordmotion'
-    Plug 'editorconfig/editorconfig-vim'
     Plug 'tpope/vim-sleuth'
-    Plug 'khaveesh/vim-fish-syntax'
     Plug 'stevearc/stickybuf.nvim'
     Plug 'digitaltoad/vim-pug'
 
