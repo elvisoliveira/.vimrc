@@ -523,10 +523,9 @@ else
     let g:airline_theme='dracula'
 endif
 
-" No statusline in the file tree window: airline skips it, and the window's
-" own statusline is blanked (laststatus=2 still reserves the row).
-let g:airline_exclude_filetypes = ['NvimTree']
-autocmd BufWinEnter NvimTree_* setlocal statusline=\ 
+" Blank airline bar in the file tree window (override renders an empty left
+" side and no right side; keeps airline in charge, so it doesn't come back).
+let g:airline_filetype_overrides = {'NvimTree': ['', '']}
 
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#tab_nr_type = 1 " tab number
