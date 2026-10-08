@@ -74,9 +74,6 @@ endfunc
 function! s:IsPluginBuffer()
     let l:name = bufname('%')
     return l:name =~# '^NvimTree_'
-        \ || l:name =~# '^__Tagbar__'
-        \ || l:name ==# '__LOTR__'
-        \ || l:name =~# '^vimspector\.'
 endfunc
 
 function! s:IsFunctionalBuffer()
@@ -98,11 +95,6 @@ function! s:SkipFunctional(cmd)
 endfunc
 
 function! BufferActions(action)
-    if bufname('%') =~# '^vimspector\.\(Console\|Output:\)'
-        call feedkeys(":VimspectorShowOutput \<Tab>", 'tn')
-        return 0
-    endif
-
     if s:IsFunctionalBuffer()
         return 0
     endif
@@ -160,17 +152,6 @@ set clipboard=unnamedplus
 set exrc
 set secure
 
-" Make Vim completion popup menu work just like in an IDE
-set completeopt=menu,menuone,noselect
-
-" Load gitignored local secrets (API keys, etc.) if present.
-" resolve() dereferences the symlink (~/.vimrc -> ~/.env/.vimrc/.vimrc) so the
-" lookup happens next to the real file, not next to the symlink.
-let s:secrets_file = fnamemodify(resolve(expand('<sfile>:p')), ':h') . '/.vimrc.secrets'
-if filereadable(s:secrets_file)
-    execute 'source ' . fnameescape(s:secrets_file)
-endif
-
 " Plugins
 call plug#begin('~/.vim/plugged')
     Plug 'godlygeek/tabular'
@@ -203,20 +184,8 @@ call plug#begin('~/.vim/plugged')
     Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
     Plug 'nvim-lua/plenary.nvim' " telescope requirement
     Plug 'nvim-telescope/telescope.nvim', { 'tag': 'v0.1.9' }
-    Plug 'echasnovski/mini.completion'
     Plug 'akinsho/toggleterm.nvim', { 'tag': 'v2.13.1' }
     Plug 'folke/which-key.nvim'
-
-    " Optional IDE profile plugins. The extra mappings/config live in ~/.vimrc.ide.
-    Plug 'elvisoliveira/vim-lotr'
-    Plug 'preservim/tagbar'
-    Plug 'breuckelen/vim-resize'
-
-    " Only on Java [Eclipse] projects
-    if (len(v:argv) > 2 && (v:argv[-2] =~ ".vimrc.java"))
-        Plug 'puremourning/vimspector'
-        Plug 'ycm-core/YouCompleteMe'
-    endif
 call plug#end()
 
 set termguicolors
@@ -312,9 +281,6 @@ let g:airline#extensions#tabline#buffer_idx_mode = 1
 vmap < <gv
 vmap > >gv
 
-" Resize Buffer
-let g:vim_resize_disable_auto_mappings = 1
-
 nnoremap <C-u> 10k
 nnoremap <C-d> 10j
 
@@ -345,16 +311,6 @@ autocmd User AirlineAfterInit call AirlineInit()
 hi Normal guibg=NONE ctermbg=NONE
 
 nnoremap <ESC> :nohlsearch<CR>
-
-inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-
-inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-
-inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
-
-inoremap <C-Space> <C-x><C-o>
 
 " vim-visual-multi
 let g:VM_maps = {}
@@ -420,11 +376,6 @@ if ok_ts then
         highlight = { enable = true, additional_vim_regex_highlighting = false },
         indent = { enable = true },
     })
-end
-
-local ok_completion, completion = pcall(require, 'mini.completion')
-if ok_completion then
-    completion.setup()
 end
 
 local ok_gitsigns, gitsigns = pcall(require, 'gitsigns')
