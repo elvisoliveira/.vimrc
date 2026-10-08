@@ -179,6 +179,7 @@ endfunc
 function! s:IsPluginBuffer()
     let l:name = bufname('%')
     return l:name =~# '^NERD_tree_'
+        \ || l:name =~# '^NvimTree_'
         \ || l:name =~# '^__Tagbar__'
         \ || l:name ==# '__LOTR__'
         \ || l:name ==# '[[buffergator-buffers]]'
@@ -343,10 +344,12 @@ call plug#begin('~/.vim/plugged')
     endif
     " Plug 'dylanaraps/wal.vim'
 
-    " Sidebar
-    Plug 'scrooloose/nerdtree'
-    Plug 'Xuyuanp/nerdtree-git-plugin'
-    Plug 'ryanoasis/vim-devicons' " Must load after Nerdtree
+    " Sidebar: nvim-tree on Neovim, NERDTree on plain Vim
+    if !has('nvim')
+        Plug 'scrooloose/nerdtree'
+        Plug 'Xuyuanp/nerdtree-git-plugin'
+        Plug 'ryanoasis/vim-devicons' " Must load after Nerdtree
+    endif
 
     " Neovim excl. plugins
     if has('nvim')
@@ -358,6 +361,8 @@ call plug#begin('~/.vim/plugged')
         Plug 'echasnovski/mini.completion'
         Plug 'akinsho/toggleterm.nvim', { 'tag': 'v2.13.1' }
         Plug 'folke/which-key.nvim'
+        Plug 'nvim-tree/nvim-web-devicons'
+        Plug 'nvim-tree/nvim-tree.lua'
     else
         Plug 'jeetsukumaran/vim-buffergator'
         Plug 'junegunn/fzf'
@@ -427,8 +432,13 @@ let g:buffergator_autodismiss_on_select=0
 let g:buffergator_autoupdate=1
 let g:buffergator_show_full_directory_path="bufname"
 
-map <C-n> :NERDTreeToggle<CR>
-map <C-f> :NERDTreeFind<CR>
+if has('nvim')
+    map <C-n> <CMD>NvimTreeToggle<CR>
+    map <C-f> <CMD>NvimTreeFindFile<CR>
+else
+    map <C-n> :NERDTreeToggle<CR>
+    map <C-f> :NERDTreeFind<CR>
+endif
 
 " <C-p> (mnemonic: Preview) opens the current file in Firefox. Defined
 " globally rather than via a FileType autocmd: at startup the command-line
@@ -774,6 +784,31 @@ if vim.fn.has('nvim') == 1 then
         vim.keymap.set('n', '<leader>?', function()
             whichkey.show({ global = false })
         end, { desc = 'Buffer keymaps' })
+    end
+
+    -- nvim-tree: NERDTree replacement, set up to match the old NERDTree options.
+    -- Keys: a create (end with / for a dir), r rename, d delete, f live filter,
+    -- s/i/t open in vsplit/split/tab (NERDTree's), g? help.
+    local ok_nvimtree, nvimtree = pcall(require, 'nvim-tree')
+    if ok_nvimtree then
+        nvimtree.setup({
+            view = { width = 60, number = true },          -- NERDTreeWinSize, ShowLineNumbers
+            filters = {
+                dotfiles = false,                          -- NERDTreeShowHidden
+                custom = { '\\.profraw$' },                -- NERDTreeIgnore
+            },
+            sync_root_with_cwd = true,                     -- NERDTreeChDirMode=2
+            on_attach = function(bufnr)
+                local api = require('nvim-tree.api')
+                api.config.mappings.default_on_attach(bufnr)
+                local function map(key, fn, desc)
+                    vim.keymap.set('n', key, fn, { buffer = bufnr, nowait = true, desc = 'nvim-tree: ' .. desc })
+                end
+                map('s', api.node.open.vertical, 'Open: vertical split')
+                map('i', api.node.open.horizontal, 'Open: horizontal split')
+                map('t', api.node.open.tab, 'Open: new tab')
+            end,
+        })
     end
 
     local ok_toggleterm, toggleterm = pcall(require, 'toggleterm')
