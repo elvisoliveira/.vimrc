@@ -788,7 +788,7 @@ if vim.fn.has('nvim') == 1 then
 
     -- nvim-tree: NERDTree replacement, set up to match the old NERDTree options.
     -- Keys: a create (end with / for a dir), r rename, d delete, f live filter,
-    -- s/i/t open in vsplit/split/tab (NERDTree's), g? help.
+    -- " / % open in horizontal / vertical split (as tmux), t in a tab, g? help.
     local ok_nvimtree, nvimtree = pcall(require, 'nvim-tree')
     if ok_nvimtree then
         nvimtree.setup({
@@ -804,8 +804,9 @@ if vim.fn.has('nvim') == 1 then
                 local function map(key, fn, desc)
                     vim.keymap.set('n', key, fn, { buffer = bufnr, nowait = true, desc = 'nvim-tree: ' .. desc })
                 end
-                map('s', api.node.open.vertical, 'Open: vertical split')
-                map('i', api.node.open.horizontal, 'Open: horizontal split')
+                -- tmux-style: " stacks (horizontal split), % side by side (vertical)
+                map('"', api.node.open.horizontal, 'Open: horizontal split')
+                map('%', api.node.open.vertical, 'Open: vertical split')
                 map('t', api.node.open.tab, 'Open: new tab')
             end,
         })
