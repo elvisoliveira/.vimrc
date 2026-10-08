@@ -236,10 +236,8 @@ noremap <F7> <CMD>Telescope find_files<CR>
 noremap <F8> <CMD>Telescope live_grep<CR>
 nnoremap <C-Space> <CMD>Telescope buffers<CR>
 
-" Open buffer on external editor (Notepad++ under wine).
-if executable('wine')
-    noremap <F9> :silent exec "!(wine \"$HOME/.wine/dosdevices/c:/Program Files/Notepad++/notepad++.exe\" % &) > /dev/null"<CR>
-endif
+" Open buffer on external editor (NotepadNext, AppImage via appman).
+nnoremap <silent> <F9> :silent exec '!notepadnext ' . shellescape(expand('%:p')) . ' >/dev/null 2>&1 &' \| redraw!<CR>
 
 " Toggle BOM
 noremap <F4> :set bomb!<CR>
