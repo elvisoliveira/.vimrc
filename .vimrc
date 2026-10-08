@@ -171,13 +171,12 @@ call plug#begin('~/.vim/plugged')
     Plug 'rhysd/git-messenger.vim'
     Plug 'lewis6991/gitsigns.nvim'
 
-    Plug 'EdenEast/nightfox.nvim'
+    Plug 'dracula/vim', { 'as': 'dracula' } " same theme as WezTerm/tmux
 
     " File tree
     Plug 'nvim-tree/nvim-web-devicons'
     Plug 'nvim-tree/nvim-tree.lua'
 
-    Plug 'neovim/nvim-lspconfig'
     Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
     Plug 'nvim-lua/plenary.nvim' " telescope requirement
     Plug 'nvim-telescope/telescope.nvim', { 'tag': 'v0.1.9' }
@@ -339,7 +338,6 @@ augroup TransparentBackground
     autocmd ColorScheme * highlight EndOfBuffer guibg=NONE ctermbg=NONE
 augroup END
 
-lua require('nightfox').setup({ options = { transparent = true } })
 silent! colorscheme dracula
 
 highlight TelescopePromptTitle guifg=#1b1f27 guibg=#e06c75
@@ -494,12 +492,4 @@ if ok_toggleterm then
 
     vim.keymap.set('t', '<Esc><Esc>', [[<C-\><C-n>]], { silent = true })
 end
-
-if vim.fn.executable('biome') == 1 then
-    vim.lsp.enable('biome')
-end
-
-vim.diagnostic.config({
-    virtual_text = true
-})
 EOF
