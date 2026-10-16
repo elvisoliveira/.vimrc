@@ -237,7 +237,9 @@ noremap <F8> <CMD>Telescope live_grep<CR>
 nnoremap <C-Space> <CMD>Telescope buffers<CR>
 
 " Open buffer on external editor (NotepadNext, AppImage via appman).
-nnoremap <silent> <F9> :silent exec '!notepadnext ' . shellescape(expand('%:p')) . ' >/dev/null 2>&1 &' \| redraw!<CR>
+" macOS: the .app bundle, opened by bundle id via `open -b`.
+let s:external_editor = has('mac') ? 'open -b io.github.dail8859.NotepadNext ' : 'notepadnext '
+nnoremap <silent> <F9> :silent exec '!' . s:external_editor . shellescape(expand('%:p')) . ' >/dev/null 2>&1 &' \| redraw!<CR>
 
 " Toggle BOM
 noremap <F4> :set bomb!<CR>
