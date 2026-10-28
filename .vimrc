@@ -94,17 +94,61 @@ function! s:SkipFunctional(cmd)
     endwhile
 endfunc
 
+" Buffer order shown in the airline tabline. Airline reads BufMRUList() when
+" g:did_bufmru is set, which is the only hook it has to reorder its buffers.
+let g:did_bufmru = 1
+let s:buf_order = []
+
+function! BufMRUList()
+    let s:buf_order = filter(s:buf_order, 'bufexists(v:val)')
+        \ + filter(range(1, bufnr('$')), 'index(s:buf_order, v:val) < 0')
+    return s:buf_order
+endfunc
+
+" Tabline buffers, in display order, without the functional ones.
+function! s:TablineBuffers()
+    return filter(copy(airline#extensions#tabline#buflist#list()),
+        \ 'index(s:functional_buf_types, getbufvar(v:val, "&buftype")) < 0 && bufname(v:val) !~# "^NvimTree_"')
+endfunc
+
+" Go to the next/previous buffer in tabline order (wraps around).
+function! s:CycleBuffer(step)
+    let l:bufs = s:TablineBuffers()
+    let l:i = index(l:bufs, bufnr('%'))
+    if l:i >= 0 && len(l:bufs) > 1
+        execute 'buffer' l:bufs[(l:i + a:step) % len(l:bufs)]
+    endif
+endfunc
+
+" Swap the current buffer with its tabline neighbour (no-op at the ends).
+function! s:MoveBuffer(step)
+    let l:bufs = s:TablineBuffers()
+    let l:i = index(l:bufs, bufnr('%'))
+    let l:j = l:i + a:step
+    if l:i < 0 || l:j < 0 || l:j >= len(l:bufs)
+        return
+    endif
+    call BufMRUList()
+    let l:a = index(s:buf_order, l:bufs[l:i])
+    let l:b = index(s:buf_order, l:bufs[l:j])
+    let [s:buf_order[l:a], s:buf_order[l:b]] = [s:buf_order[l:b], s:buf_order[l:a]]
+    call airline#extensions#tabline#buflist#clean()
+    redrawtabline
+endfunc
+
 function! BufferActions(action)
     if s:IsFunctionalBuffer()
         return 0
     endif
 
     if a:action == 'next'
-        execute ':bnext'
-        call s:SkipFunctional(':bnext')
+        call s:CycleBuffer(1)
     elseif a:action == 'previous'
-        execute ':bprevious'
-        call s:SkipFunctional(':bprevious')
+        call s:CycleBuffer(-1)
+    elseif a:action == 'move_next'
+        call s:MoveBuffer(1)
+    elseif a:action == 'move_previous'
+        call s:MoveBuffer(-1)
     elseif a:action == 'close'
         execute ':Bdelete!'
         call s:SkipFunctional(':bnext')
@@ -153,7 +197,7 @@ set exrc
 set secure
 
 " Plugins
-call plug#begin('~/.vim/plugged')
+call plug#begin(stdpath('data') . '/plugged')
     Plug 'godlygeek/tabular'
     Plug 'itchyny/vim-cursorword'
     Plug 'moll/vim-bbye'
@@ -172,6 +216,16 @@ call plug#begin('~/.vim/plugged')
     Plug 'lewis6991/gitsigns.nvim'
 
     Plug 'dracula/vim', { 'as': 'dracula' } " same theme as WezTerm/tmux
+
+    " Extra colorschemes to try with <F10> (live preview picker)
+    Plug 'folke/tokyonight.nvim'
+    Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
+    Plug 'rebelot/kanagawa.nvim'
+    Plug 'ellisonleao/gruvbox.nvim'
+    Plug 'rose-pine/neovim', { 'as': 'rose-pine' }
+    Plug 'EdenEast/nightfox.nvim'
+    Plug 'navarasu/onedark.nvim'
+    Plug 'sainnhe/everforest'
 
     " File tree
     Plug 'nvim-tree/nvim-web-devicons'
@@ -211,6 +265,8 @@ nnoremap <silent> <C-p> :silent exec '!firefox ' . shellescape(expand('%:p')) . 
 " Buffer Control
 nnoremap <C-k> :call BufferActions('next')<CR>
 nnoremap <C-j> :call BufferActions('previous')<CR>
+nnoremap <silent> <C-S-k> :call BufferActions('move_next')<CR>
+nnoremap <silent> <C-S-j> :call BufferActions('move_previous')<CR>
 nnoremap <C-x> :call BufferActions('close')<CR>
 nnoremap <C-h> :call BufferActions('alternate')<CR>
 
@@ -235,6 +291,10 @@ noremap <F3> :call ToggleMouse()<CR>
 noremap <F7> <CMD>Telescope find_files<CR>
 noremap <F8> <CMD>Telescope live_grep<CR>
 nnoremap <C-Space> <CMD>Telescope buffers<CR>
+
+" Colorscheme picker: moving the selection previews it live, <CR> keeps it,
+" <Esc> restores the previous one.
+noremap <F10> <CMD>lua require('telescope.builtin').colorscheme({ enable_preview = true, ignore_builtins = true })<CR>
 
 " Open buffer on external editor (NotepadNext, AppImage via appman).
 " macOS: the .app bundle, opened by bundle id via `open -b`.
@@ -276,6 +336,9 @@ let g:airline#extensions#tabline#buffer_idx_mode = 1
 " Fix indenting visual block
 vmap < <gv
 vmap > >gv
+
+" Ctrl+Z suspends nvim to the shell (looks like it closed); disable it.
+noremap <C-z> <Nop>
 
 nnoremap <C-u> 10k
 nnoremap <C-d> 10j
@@ -338,7 +401,18 @@ augroup TransparentBackground
     autocmd ColorScheme * highlight EndOfBuffer guibg=NONE ctermbg=NONE
 augroup END
 
-silent! colorscheme dracula
+" The last colorscheme picked survives restarts; dracula (WezTerm/tmux match)
+" is the default and the fallback if the saved one is no longer installed.
+let s:colorscheme_file = stdpath('state') . '/colorscheme'
+try
+    execute 'colorscheme ' . (filereadable(s:colorscheme_file) ? readfile(s:colorscheme_file)[0] : 'dracula')
+catch
+    silent! colorscheme dracula
+endtry
+augroup PersistColorscheme
+    autocmd!
+    autocmd ColorScheme * call writefile([expand('<amatch>')], s:colorscheme_file)
+augroup END
 
 highlight TelescopePromptTitle guifg=#1b1f27 guibg=#e06c75
 highlight TelescopePromptPrefix guifg=#e06c75
