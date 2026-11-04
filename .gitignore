@@ -1,2 +1,5 @@
 *.swp
 .vimrc.secrets
+.codex
+.nvimlog
+nvim.log
