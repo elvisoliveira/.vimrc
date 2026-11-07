@@ -264,6 +264,13 @@ nnoremap <C-q> <CMD>qa<CR>
 nnoremap <C-b>q <CMD>qa!<CR>
 inoremap <C-b>q <CMD>qa!<CR>
 tnoremap <C-b>q <CMD>qa!<CR>
+" Inside the float (TMUX_OUTER is set only there) the C-e that opened it also
+" closes it, like C-q. Elsewhere C-e keeps nvim's scroll-one-line.
+if !empty($TMUX_OUTER)
+    nnoremap <C-e> <CMD>qa<CR>
+    inoremap <C-e> <CMD>qa<CR>
+    tnoremap <C-e> <CMD>qa<CR>
+endif
 
 " <C-p> (mnemonic: Preview) opens the current file in Firefox. Defined
 " globally rather than via a FileType autocmd: at startup the command-line
