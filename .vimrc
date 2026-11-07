@@ -256,8 +256,8 @@ nnoremap <silent> <C-c> :call CopyToClipboard(expand('<cword>'))<CR>
 map <C-n> <CMD>NvimTreeToggle<CR>
 map <C-f> <CMD>NvimTreeFindFile<CR>
 
-" Ctrl+Q quits (refuses with unsaved buffers). tmux grabs C-q to open nvim in a
-" float (~/.env/.tmux.conf/bin/float), so this only fires inside that float.
+" Ctrl+Q quits (refuses with unsaved buffers). tmux opens nvim in a float with
+" C-e (~/.env/.tmux.conf/bin/float); C-q is free in every pane.
 nnoremap <C-q> <CMD>qa<CR>
 " C-b q force-quits, discarding unsaved changes (same chord as gitsmart's quit).
 " Only reaches nvim inside the float: elsewhere C-b is the tmux prefix.
