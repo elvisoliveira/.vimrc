@@ -256,6 +256,15 @@ nnoremap <silent> <C-c> :call CopyToClipboard(expand('<cword>'))<CR>
 map <C-n> <CMD>NvimTreeToggle<CR>
 map <C-f> <CMD>NvimTreeFindFile<CR>
 
+" Ctrl+Q quits (refuses with unsaved buffers). tmux grabs C-q to open nvim in a
+" float (~/.env/.tmux.conf/bin/float), so this only fires inside that float.
+nnoremap <C-q> <CMD>qa<CR>
+" C-b q force-quits, discarding unsaved changes (same chord as gitsmart's quit).
+" Only reaches nvim inside the float: elsewhere C-b is the tmux prefix.
+nnoremap <C-b>q <CMD>qa!<CR>
+inoremap <C-b>q <CMD>qa!<CR>
+tnoremap <C-b>q <CMD>qa!<CR>
+
 " <C-p> (mnemonic: Preview) opens the current file in Firefox. Defined
 " globally rather than via a FileType autocmd: at startup the command-line
 " file's FileType event is swallowed by another eager plugin, so a buffer-local
