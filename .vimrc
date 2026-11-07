@@ -556,6 +556,10 @@ if ok_nvimtree then
             map('"', api.node.open.horizontal, 'Open: horizontal split')
             map('%', api.node.open.vertical, 'Open: vertical split')
             map('t', api.node.open.tab, 'Open: new tab')
+            -- Inside the tmux float, C-e closes nvim here too (default: open in place)
+            if vim.env.TMUX_OUTER and vim.env.TMUX_OUTER ~= '' then
+                map('<C-e>', '<Cmd>qa<CR>', 'Close the tmux float')
+            end
         end,
     })
 end
