@@ -1,17 +1,12 @@
-# ~/.vimrc
-My Vim Setup.
+# .vimrc
+My (neo)vim setup.
 
-```
-ln -s (pwd)/.vimrc ~/.vimrc
-```
-
-## Neovim
-
-Neovim does not read `~/.vimrc` by default. Create `~/.config/nvim/init.vim`
-with:
+Neovim loads it through `~/.config/nvim/init.vim`:
 
 ```vim
-set runtimepath^=~/.vim runtimepath+=~/.vim/after
-let &packpath=&runtimepath
-source ~/.vimrc
+source ~/.config/nvim/vimrc
 ```
+
+with `~/.config/nvim/vimrc` a symlink to this repo's `.vimrc`. Plugins are
+managed by vim-plug and install into `~/.local/share/nvim/plugged`; there is no
+`~/.vimrc` or `~/.vim`.
