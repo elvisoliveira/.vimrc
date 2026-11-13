@@ -217,16 +217,6 @@ call plug#begin(stdpath('data') . '/plugged')
 
     Plug 'dracula/vim', { 'as': 'dracula' } " same theme as WezTerm/tmux
 
-    " Extra colorschemes to try with <F10> (live preview picker)
-    Plug 'folke/tokyonight.nvim'
-    Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
-    Plug 'rebelot/kanagawa.nvim'
-    Plug 'ellisonleao/gruvbox.nvim'
-    Plug 'rose-pine/neovim', { 'as': 'rose-pine' }
-    Plug 'EdenEast/nightfox.nvim'
-    Plug 'navarasu/onedark.nvim'
-    Plug 'sainnhe/everforest'
-
     " File tree
     Plug 'nvim-tree/nvim-web-devicons'
     Plug 'nvim-tree/nvim-tree.lua'
@@ -306,10 +296,6 @@ noremap <F7> <CMD>Telescope find_files<CR>
 noremap <F8> <CMD>Telescope live_grep<CR>
 nnoremap <C-Space> <CMD>Telescope buffers<CR>
 
-" Colorscheme picker: moving the selection previews it live, <CR> keeps it,
-" <Esc> restores the previous one.
-noremap <F10> <CMD>lua require('telescope.builtin').colorscheme({ enable_preview = true, ignore_builtins = true })<CR>
-
 " Open buffer on external editor (NotepadNext, AppImage via appman).
 " macOS: the .app bundle, opened by bundle id via `open -b`.
 let s:external_editor = has('mac') ? 'open -b io.github.dail8859.NotepadNext ' : 'notepadnext '
@@ -362,6 +348,10 @@ nnoremap <PageDown> 10j
 nnoremap <Home> ^
 
 nnoremap <silent> <Tab> :
+" <Tab> and <C-i> are the same byte on a plain terminal, so the map above also
+" took the jumplist-forward key. With the kitty keyboard protocol (WezTerm, and
+" tmux extended-keys) they arrive as distinct keys: give <C-i> its meaning back.
+nnoremap <C-i> <C-i>
 
 " TMUX
 let g:tmux_navigator_no_mappings = 1
@@ -415,18 +405,8 @@ augroup TransparentBackground
     autocmd ColorScheme * highlight EndOfBuffer guibg=NONE ctermbg=NONE
 augroup END
 
-" The last colorscheme picked survives restarts; dracula (WezTerm/tmux match)
-" is the default and the fallback if the saved one is no longer installed.
-let s:colorscheme_file = stdpath('state') . '/colorscheme'
-try
-    execute 'colorscheme ' . (filereadable(s:colorscheme_file) ? readfile(s:colorscheme_file)[0] : 'dracula')
-catch
-    silent! colorscheme dracula
-endtry
-augroup PersistColorscheme
-    autocmd!
-    autocmd ColorScheme * call writefile([expand('<amatch>')], s:colorscheme_file)
-augroup END
+" Same theme as WezTerm/tmux/sway. silent!: plugins may not be installed yet.
+silent! colorscheme dracula
 
 highlight TelescopePromptTitle guifg=#1b1f27 guibg=#e06c75
 highlight TelescopePromptPrefix guifg=#e06c75
@@ -452,14 +432,50 @@ highlight TelescopePreviewMatch guifg=#1b1f27 guibg=#ffaa00 gui=bold
 highlight TelescopePreviewLine guibg=#3a4060
 
 lua <<EOF
-local ok_ts, ts = pcall(require, 'nvim-treesitter.configs')
+-- nvim-treesitter `main` branch: it only installs parsers (new ones need the
+-- tree-sitter CLI); highlighting and indent are started per buffer below.
+local ok_ts, ts = pcall(require, 'nvim-treesitter')
 if ok_ts then
-    ts.setup({
-        ensure_installed = { 'typescript', 'tsx', 'javascript', 'jsdoc', 'html', 'css', 'json' },
-        highlight = { enable = true, additional_vim_regex_highlighting = false },
-        indent = { enable = true },
+    ts.install({ 'typescript', 'tsx', 'javascript', 'jsdoc', 'html', 'css', 'json' })
+    vim.api.nvim_create_autocmd('FileType', {
+        group = vim.api.nvim_create_augroup('TreesitterStart', {}),
+        callback = function(ev)
+            -- start() fails when the filetype has no parser: keep regex syntax then
+            if pcall(vim.treesitter.start, ev.buf) then
+                vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+            end
+        end,
     })
 end
+
+-- Built-in LSP client (no plugin). Default keys: K hover, grn rename, gra code
+-- action, grr references, gri implementation, <C-]> definition, ]d / [d diagnostics.
+-- Servers are enabled only when installed. TypeScript >= 7 ships its own
+-- language server in tsc (npm i -g typescript); there is no tsserver anymore.
+if vim.fn.executable('tsc') == 1 then
+    vim.lsp.config('tsc', {
+        cmd = { 'tsc', '--lsp', '--stdio' },
+        filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
+        root_markers = { 'tsconfig.json', 'jsconfig.json', 'package.json', '.git' },
+    })
+    vim.lsp.enable('tsc')
+end
+if vim.fn.executable('rust-analyzer') == 1 then
+    vim.lsp.config('rust_analyzer', {
+        cmd = { 'rust-analyzer' },
+        filetypes = { 'rust' },
+        root_markers = { 'Cargo.toml', '.git' },
+    })
+    vim.lsp.enable('rust_analyzer')
+end
+-- Completion popup as you type, fed by the attached server.
+vim.opt.completeopt = { 'menuone', 'noselect', 'popup' }
+vim.api.nvim_create_autocmd('LspAttach', {
+    group = vim.api.nvim_create_augroup('LspCompletion', {}),
+    callback = function(ev)
+        vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, { autotrigger = true })
+    end,
+})
 
 local ok_gitsigns, gitsigns = pcall(require, 'gitsigns')
 if ok_gitsigns then
