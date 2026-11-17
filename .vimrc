@@ -408,28 +408,30 @@ augroup END
 " Same theme as WezTerm/tmux/sway. silent!: plugins may not be installed yet.
 silent! colorscheme dracula
 
-highlight TelescopePromptTitle guifg=#1b1f27 guibg=#e06c75
-highlight TelescopePromptPrefix guifg=#e06c75
-highlight TelescopePromptNormal guibg=#252931
-highlight TelescopePromptBorder guifg=#252931 guibg=#252931
+" Telescope in Dracula colours (dracula/vim ships no Telescope groups). Borderless
+" blocks on the palette's darker backgrounds: bgdark #21222c, bgdarker #191a21.
+highlight TelescopePromptTitle guifg=#282a36 guibg=#ff79c6
+highlight TelescopePromptPrefix guifg=#ff79c6
+highlight TelescopePromptNormal guibg=#21222c
+highlight TelescopePromptBorder guifg=#21222c guibg=#21222c
 
-highlight TelescopeResultsNormal guibg=#1b1f27
-highlight TelescopeResultsBorder guifg=#1b1f27 guibg=#1b1f27
+highlight TelescopeResultsNormal guibg=#191a21
+highlight TelescopeResultsBorder guifg=#191a21 guibg=#191a21
 
-highlight TelescopePreviewTitle guifg=#1b1f27 guibg=#98c379
-highlight TelescopePreviewNormal guibg=#252931
-highlight TelescopePreviewBorder guifg=#252931 guibg=#252931
+highlight TelescopePreviewTitle guifg=#282a36 guibg=#50fa7b
+highlight TelescopePreviewNormal guibg=#21222c
+highlight TelescopePreviewBorder guifg=#21222c guibg=#21222c
 
-highlight TelescopeSelection guifg=#B0BEC5 guibg=#252931
+highlight TelescopeSelection guifg=#f8f8f2 guibg=#44475a
 
-" Highlight the matched substring in result rows. Bright + bold so it stays
-" visible on both the normal (#1b1f27) and selected (#252931) row backgrounds.
-highlight TelescopeMatching guifg=#ffaa00 gui=bold
+" Highlight the matched substring in result rows. Dracula orange + bold so it
+" stays visible on both the normal (#191a21) and selected (#44475a) rows.
+highlight TelescopeMatching guifg=#ffb86c gui=bold
 
 " Match highlight inside the PREVIEW pane. Uses a background color so it
 " stays visible even when treesitter has painted the foreground.
-highlight TelescopePreviewMatch guifg=#1b1f27 guibg=#ffaa00 gui=bold
-highlight TelescopePreviewLine guibg=#3a4060
+highlight TelescopePreviewMatch guifg=#282a36 guibg=#ffb86c gui=bold
+highlight TelescopePreviewLine guibg=#44475a
 
 lua <<EOF
 -- nvim-treesitter `main` branch: it only installs parsers (new ones need the
