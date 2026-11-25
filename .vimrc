@@ -296,10 +296,9 @@ noremap <F7> <CMD>Telescope find_files<CR>
 noremap <F8> <CMD>Telescope live_grep<CR>
 nnoremap <C-Space> <CMD>Telescope buffers<CR>
 
-" Open buffer on external editor (NotepadNext, AppImage via appman).
-" macOS: the .app bundle, opened by bundle id via `open -b`.
-let s:external_editor = has('mac') ? 'open -b io.github.dail8859.NotepadNext ' : 'notepadnext '
-nnoremap <silent> <F9> :silent exec '!' . s:external_editor . shellescape(expand('%:p')) . ' >/dev/null 2>&1 &' \| redraw!<CR>
+" Open buffer on external editor (NotepadNext AppImage, ~/.local/bin/notepadnext).
+" Detached job: survives nvim exit, no shell quoting.
+nnoremap <silent> <F9> :call jobstart(['notepadnext', expand('%:p')], {'detach': v:true})<CR>
 
 " Toggle BOM
 noremap <F4> :set bomb!<CR>
@@ -551,7 +550,7 @@ if ok_whichkey then
 end
 
 -- nvim-tree: NERDTree replacement, set up to match the old NERDTree options.
--- Keys: a create (end with / for a dir), r rename, d delete, f live filter,
+-- Keys: a create (end with / for a dir), r reload, R rename, d delete, f live filter,
 -- " / % open in horizontal / vertical split (as tmux), t in a tab, g? help.
 local ok_nvimtree, nvimtree = pcall(require, 'nvim-tree')
 if ok_nvimtree then
@@ -572,6 +571,9 @@ if ok_nvimtree then
             map('"', api.node.open.horizontal, 'Open: horizontal split')
             map('%', api.node.open.vertical, 'Open: vertical split')
             map('t', api.node.open.tab, 'Open: new tab')
+            -- NERDTree-style: r reloads; rename moves to R (default R was refresh)
+            map('r', api.tree.reload, 'Refresh')
+            map('R', api.fs.rename, 'Rename')
             -- Inside the tmux float, C-e closes nvim here too (default: open in place)
             if vim.env.TMUX_OUTER and vim.env.TMUX_OUTER ~= '' then
                 map('<C-e>', '<Cmd>qa<CR>', 'Close the tmux float')
